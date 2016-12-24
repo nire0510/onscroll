@@ -29,4 +29,6 @@ tmp
 
 # Users Environment Variables
 .lock-wscript
- test/sample.html
+
+test/sample.html
+.idea
