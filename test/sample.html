@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Orchestrator Tester</title>
+  <script src="../dist/orchestrator.js"></script>
+  <style>
+    .box {
+      background-color: #fefefe;
+      height: 250px;
+      width: 250px;
+    }
+
+    .green {
+      background-color: green;
+    }
+
+    .gold {
+      background-color: gold;
+    }
+  </style>
+</head>
+<body>
+<h1 class="first-title green">Title</h1>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam assumenda atque deserunt, esse fuga ipsam iusto magnam, magni, molestiae nemo non quis rerum! Cupiditate esse ex ipsa, iste quaerat quod.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error eum eveniet itaque natus quidem quisquam quo, sunt. Commodi consectetur corporis eos et id, ipsam labore, maxime, molestiae perspiciatis quisquam tempora!</p>
+<h2>Sub Title</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam ipsum iure nostrum odio officia pariatur placeat repellat reprehenderit repudiandae rerum? Ab at beatae, dolore esse expedita inventore laboriosam magni quaerat.</p>
+<div class="box first-box"></div>
+<h1 class="last-title">Title</h1>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam assumenda atque deserunt, esse fuga ipsam iusto magnam, magni, molestiae nemo non quis rerum! Cupiditate esse ex ipsa, iste quaerat quod.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error eum eveniet itaque natus quidem quisquam quo, sunt. Commodi consectetur corporis eos et id, ipsam labore, maxime, molestiae perspiciatis quisquam tempora!</p>
+<div class="box last-box"></div>
+<script>
+  let a = orchestrator.default.add({
+    selector: '.last-title',
+    top: [120],
+    actions: {
+      addClass: 'gold',
+      setStyle: {
+        color: 'red',
+        transform: function (left, top) {
+          return `translateX(${top - 120}px)`;
+        }
+      }
+    }
+  });
+
+//  window.setTimeout(function () {
+//    orchestrator.default.disable(b);
+//  }, 4000);
+//
+//  window.setTimeout(function () {
+//    orchestrator.default.enable(b);
+//  }, 8000);
+</script>
+</body>
+</html>
