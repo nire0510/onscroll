@@ -2,9 +2,9 @@
 
 Directs web page elements to produce a desired effect.
 
-[![Travis build status](http://img.shields.io/travis/nire0510/orchestrator.svg?style=flat)](https://travis-ci.org/nire0510/orchestrator)
-[![Code Climate](https://codeclimate.com/github/nire0510/orchestrator/badges/gpa.svg)](https://codeclimate.com/github/nire0510/orchestrator)
-[![Test Coverage](https://codeclimate.com/github/nire0510/orchestrator/badges/coverage.svg)](https://codeclimate.com/github/nire0510/orchestrator)
+<!--[![Travis build status](http://img.shields.io/travis/nire0510/orchestrator.svg?style=flat)](https://travis-ci.org/nire0510/orchestrator)-->
+<!--[![Code Climate](https://codeclimate.com/github/nire0510/orchestrator/badges/gpa.svg)](https://codeclimate.com/github/nire0510/orchestrator)-->
+<!--[![Test Coverage](https://codeclimate.com/github/nire0510/orchestrator/badges/coverage.svg)](https://codeclimate.com/github/nire0510/orchestrator)-->
 [![Dependency Status](https://david-dm.org/nire0510/orchestrator.svg)](https://david-dm.org/nire0510/orchestrator)
 [![devDependency Status](https://david-dm.org/nire0510/orchestrator/dev-status.svg)](https://david-dm.org/nire0510/orchestrator#info=devDependencies)
 
@@ -24,44 +24,42 @@ npm: `npm install orchestrator --save`
 2. Add one or more directives:  
  ```javascript
 let directiveId = orchestrator.default.add({
-    // {string} CSS3 selector or multiple comma separated selectors: 
-    selector: '.first-selector, #second-selector',
+  // {string} CSS3 selector or multiple comma separated selectors: 
+  selector: '.first-selector, #second-selector',
     
-    // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
-    // or
-    // [{number}, {number}] horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
-    left: 20,
+  // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
+  // or
+  // [{number}, {number}] horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
+  left: 20,
     
-    // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
-    // or
-    // [{number}, {number}] vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
-    top: 20,
-    // one or more actions to apply:
+  // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
+  // or
+  // [{number}, {number}] vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
+  top: 20,
+  // one or more actions to apply:
+  actions: {
+    // add one or more class names:
+    addClass: 'gold',
     
-    actions: {
-      // add one or more class names:
-      addClass: 'gold',
+    // remove one or more class names:
+    removeClass: ['opacity', 'double-padding'],
     
-      // remove one or more class names:
-      removeClass: ['opacity', 'double-padding'],
-    
-      // set inline style:
-      setStyle: {
-        transform: function(left, top) {
-          return `translateY(${20 - top}px)`;
-        },
-        paddingLeft: function(left/*, top*/) {
-          return `${left}px`;
-        }
+    // set inline style:
+    setStyle: {
+      transform: function(left, top) {
+        return `translateY(${20 - top}px)`;
       },
-    
-      // call a function:
-      callFunction: function(/*left, top*/) {
-        this.revealPopup();
+      paddingLeft: function(left/*, top*/) {
+        return `${left}px`;
       }
+    },
+    
+    // call a function:
+    callFunction: function(/*left, top*/) {
+      this.revealPopup();
     }
   }
-);
+});
 ```
 The return value is the directive auto-generated id.
 If you want name it yourself, do as follows:
@@ -72,18 +70,17 @@ Use `addClass` and `removeClass` when you want to set or unset CSS properties wi
 This is done by adding or removing class name(s) to element(s).
 ```javascript
 orchestrator.default.add({
-    selector: '.some-element',
-    top: 20,
-    actions: {
-      // value can be either string in case of a single class name to add:
-      addClass: 'gold'
-      // or an array in case of multiple class names to add:
-      //addClass: ['gold', 'double-spacing'],
-      // to remove one or more class names, use the -removeClass- action:
-      //removeClass: 'gold'
-    }
+  selector: '.some-element',
+  top: 20,
+  actions: {
+    // value can be either string in case of a single class name to add:
+    addClass: 'gold'
+    // or an array in case of multiple class names to add:
+    //addClass: ['gold', 'double-spacing'],
+    // to remove one or more class names, use the -removeClass- action:
+    //removeClass: 'gold'
   }
-);
+});
 ```
 
 ### Moderate
@@ -93,20 +90,19 @@ with two arguments, `left` (current horizontal scroll position) and `top` (curre
 which can be used for calculating the function's return value - the value of CSS property. 
 ```javascript
 orchestrator.default.add({
-    selector: '.some-element',
-    top: 20,
-    actions: {
-      setStyle: {
-        transform: function(left, top) {
-          return `translateY(${20 - top}px)`;
-        },
-        paddingLeft: function(left/*, top*/) {
-          return `${left}px`;
-        }
+  selector: '.some-element',
+  top: 20,
+  actions: {
+    setStyle: {
+      transform: function(left, top) {
+        return `translateY(${20 - top}px)`;
       },
-    }
+      paddingLeft: function(left/*, top*/) {
+        return `${left}px`;
+      }
+    },
   }
-);
+});
 ```
 
 ### Advance
@@ -115,17 +111,16 @@ execute JavaScript etc. The action's value is a function with two arguments,
 `left` (current horizontal scroll position) and `top` (current vertical scroll position) which should not return any value.
 ```javascript
 orchestrator.default.add({
-    selector: '.some-element',
-    top: 20,
-    actions: {
-      callFunction: function (left, top) {
-        if (left > 100) {
-          submitForm();          
-        }
+  selector: '.some-element',
+  top: 20,
+  actions: {
+    callFunction: function (left, top) {
+      if (left > 100) {
+        submitForm();          
       }
     }
   }
-);
+});
 ```
 
 ## More Commands

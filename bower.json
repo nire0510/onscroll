@@ -1,0 +1,33 @@
+{
+  "name": "orchestrator",
+  "description": "Makes your web page dance on scroll",
+  "main": "dist/orchestrator.js",
+  "authors": [
+    "Nir Elbaz <nire0510@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "scroll",
+    "animation",
+    "transition",
+    "performance"
+  ],
+  "homepage": "https://github.com/nire0510/orchestrator",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "src",
+    ".babelrc",
+    ".editorconfig",
+    ".eslintrc",
+    ".gitignore",
+    ".travis.yml",
+    "bower.json",
+    "gulpfile.js",
+    "LICENSE",
+    "package.json"
+  ]
+}
