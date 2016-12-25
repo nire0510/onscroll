@@ -11,12 +11,12 @@ Directs web page elements to produce a desired effect.
 ## Introduction
 Many web pages these days produce the "wow effect" by triggering transitions and animations based on scroll position.
 Though it might look good, naive implementation can affect performance and lead to a bad user experience.  
-With page performance in mind, Orchestrator can help you achieve this behaviour with only one command in three flavors:
+With page performance in mind, Orchestrator can help you achieve this behaviour with a single command in three flavors:
 basic, moderate & advance.  
 
 ## Installation:
 Bower: `bower install orchestrator --save`  
-npm: `npm install orchestrator --save`
+<!--npm: `npm install orchestrator --save`-->
 
 ## Usage:
 1. Add a reference to **orchestrator** library to your web page:  
@@ -27,38 +27,44 @@ let directiveId = orchestrator.default.add({
   // {string} CSS3 selector or multiple comma separated selectors: 
   selector: '.first-selector, #second-selector',
     
-  // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
-  // or
-  // [{number}, {number}] horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
-  left: 20,
-    
-  // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
-  // or
-  // [{number}, {number}] vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
-  top: 20,
-  // one or more actions to apply:
-  actions: {
-    // add one or more class names:
-    addClass: 'gold',
-    
-    // remove one or more class names:
-    removeClass: ['opacity', 'double-padding'],
-    
-    // set inline style:
-    setStyle: {
-      transform: function(left, top) {
-        return `translateY(${20 - top}px)`;
-      },
-      paddingLeft: function(left/*, top*/) {
-        return `${left}px`;
+  // [{object}] array of scenes, each scene contains left / top scroll position which actions should be applied:
+  timeline: [
+    {
+      // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
+      // or
+      // [{number}, {number}] horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
+      left: 20,
+      
+      // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
+      // or
+      // [{number}, {number}] vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
+      top: 20,
+
+      // one or more actions to apply:
+      actions: {
+        // add one or more class names:
+        addClass: 'gold',
+        
+        // remove one or more class names:
+        removeClass: ['opacity', 'double-padding'],
+        
+        // set inline style:
+        setStyle: {
+          transform: function(left, top) {
+            return `translateY(${20 - top}px)`;
+          },
+          paddingLeft: function(left/*, top*/) {
+            return `${left}px`;
+          }
+        },
+        
+        // call a function:
+        callFunction: function(/*left, top*/) {
+          this.revealPopup();
+        }
       }
-    },
-    
-    // call a function:
-    callFunction: function(/*left, top*/) {
-      this.revealPopup();
     }
-  }
+  ]
 });
 ```
 The return value is the directive auto-generated id.
@@ -71,15 +77,19 @@ This is done by adding or removing class name(s) to element(s).
 ```javascript
 orchestrator.default.add({
   selector: '.some-element',
-  top: 20,
-  actions: {
-    // value can be either string in case of a single class name to add:
-    addClass: 'gold'
-    // or an array in case of multiple class names to add:
-    //addClass: ['gold', 'double-spacing'],
-    // to remove one or more class names, use the -removeClass- action:
-    //removeClass: 'gold'
-  }
+  timeline: [
+    {
+      top: 20,
+      actions: {
+        // value can be either string in case of a single class name to add:
+        addClass: 'gold'
+        // or an array in case of multiple class names to add:
+        //addClass: ['gold', 'double-spacing'],
+        // to remove one or more class names, use the -removeClass- action:
+        //removeClass: 'gold'
+      }
+    }
+  ]
 });
 ```
 
@@ -91,17 +101,21 @@ which can be used for calculating the function's return value - the value of CSS
 ```javascript
 orchestrator.default.add({
   selector: '.some-element',
-  top: 20,
-  actions: {
-    setStyle: {
-      transform: function(left, top) {
-        return `translateY(${20 - top}px)`;
-      },
-      paddingLeft: function(left/*, top*/) {
-        return `${left}px`;
+  timeline: [
+    {
+      top: 20,
+      actions: {
+        setStyle: {
+          transform: function(left, top) {
+            return `translateY(${20 - top}px)`;
+          },
+          paddingLeft: function(left/*, top*/) {
+            return `${left}px`;
+          }
+        },
       }
-    },
-  }
+    }
+  ]
 });
 ```
 
@@ -112,14 +126,18 @@ execute JavaScript etc. The action's value is a function with two arguments,
 ```javascript
 orchestrator.default.add({
   selector: '.some-element',
-  top: 20,
-  actions: {
-    callFunction: function (left, top) {
-      if (left > 100) {
-        submitForm();          
+  timeline: [
+    {
+      top: 20,
+      actions: {
+        callFunction: function (left, top) {
+          if (left > 100) {
+            submitForm();          
+          }
+        }
       }
     }
-  }
+  ]
 });
 ```
 

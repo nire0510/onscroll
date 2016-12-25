@@ -250,64 +250,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'extractOptions',
 	    value: function extractOptions(options) {
+	      var _this = this;
+	
 	      // check for common options:
-	      if (options.selector && options.actions && _typeof(options.actions) === 'object' && (options.top && (isFinite(options.top) || Array.isArray(options.top) && options.top.every(function (n) {
-	        return isFinite(n);
-	      })) || options.left && (isFinite(options.left) || Array.isArray(options.left) && options.left.every(function (n) {
-	        return isFinite(n);
-	      })))) {
+	      if (options.selector && options.timeline && _typeof(options.timeline) === 'object') {
 	        this.selector = options.selector;
 	        this.element = document.querySelectorAll(options.selector);
-	        this.top = Array.isArray(options.top) ? options.top : [options.top, null];
-	        this.left = Array.isArray(options.left) ? options.left : [options.left, null];
-	        this.actions = options.actions;
+	        this.timeline = options.timeline;
 	
-	        // now check actions object:
-	        for (var action in this.actions) {
-	          if (this.actions.hasOwnProperty(action)) {
-	            switch (action) {
-	              case 'addClass':
-	                if (typeof this.actions[action] === 'string' || Array.isArray(this.actions[action])) {
-	                  if (typeof this.actions[action] === 'string') {
-	                    this.actions.addClass = [this.actions[action]];
-	                  }
-	                } else {
-	                  delete this.actions[action];
-	                  console.warn('Action ' + action + ' of directive ' + this.id + ' is not valid');
+	        // validate and format timeline array:
+	        this.timeline.forEach(function (scene) {
+	          if (scene.actions && _typeof(scene.actions) === 'object' && (scene.top && (isFinite(scene.top) || Array.isArray(scene.top) && scene.top.every(function (n) {
+	            return isFinite(n);
+	          })) || scene.left && (isFinite(scene.left) || Array.isArray(scene.left) && scene.left.every(function (n) {
+	            return isFinite(n);
+	          })))) {
+	            scene.top = Array.isArray(scene.top) ? scene.top : [scene.top, null];
+	            scene.left = Array.isArray(scene.left) ? scene.left : [scene.left, null];
+	
+	            // now check actions object:
+	            for (var action in scene.actions) {
+	              if (scene.actions.hasOwnProperty(action)) {
+	                switch (action) {
+	                  case 'addClass':
+	                    if (typeof scene.actions[action] === 'string' || Array.isArray(scene.actions[action])) {
+	                      if (typeof scene.actions[action] === 'string') {
+	                        scene.actions.addClass = [scene.actions[action]];
+	                      }
+	                    } else {
+	                      delete scene.actions[action];
+	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
+	                    }
+	                    break;
+	                  case 'removeClass':
+	                    if (typeof scene.actions[action] === 'string' || Array.isArray(scene.actions[action])) {
+	                      if (typeof scene.actions[action] === 'string') {
+	                        scene.actions.removeClass = [scene.actions[action]];
+	                      }
+	                    } else {
+	                      delete scene.actions[action];
+	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
+	                    }
+	                    break;
+	                  case 'setStyle':
+	                    if (_typeof(scene.actions[action]) !== 'object' || Object.keys(scene.actions[action]).length === 0) {
+	                      delete scene.actions[action];
+	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
+	                    }
+	                    break;
+	                  case 'callFunction':
+	                    if (typeof scene.method !== 'function') {
+	                      delete scene.actions[action];
+	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
+	                    }
+	                    break;
 	                }
-	                break;
-	              case 'removeClass':
-	                if (typeof this.actions[action] === 'string' || Array.isArray(this.actions[action])) {
-	                  if (typeof this.actions[action] === 'string') {
-	                    this.actions.removeClass = [this.actions[action]];
-	                  }
-	                } else {
-	                  delete this.actions[action];
-	                  console.warn('Action ' + action + ' of directive ' + this.id + ' is not valid');
-	                }
-	                break;
-	              case 'setStyle':
-	                if (_typeof(this.actions[action]) !== 'object' || Object.keys(this.actions[action]).length === 0) {
-	                  delete this.actions[action];
-	                  console.warn('Action ' + action + ' of directive ' + this.id + ' is not valid');
-	                }
-	                break;
-	              case 'callFunction':
-	                if (typeof this.method !== 'function') {
-	                  delete this.actions[action];
-	                  console.warn('Action ' + action + ' of directive ' + this.id + ' is not valid');
-	                }
-	                break;
+	              }
+	
+	              if (Object.keys(scene.actions).length > 0) {
+	                _this.enabled = true;
+	                _this.valid = true;
+	              } else {
+	                console.warn('Directive ' + _this.id + ' has no valid actions');
+	              }
 	            }
 	          }
-	
-	          if (Object.keys(this.actions).length > 0) {
-	            this.enabled = true;
-	            this.valid = true;
-	          } else {
-	            console.warn('Directive ' + this.id + ' has no valid actions');
-	          }
-	        }
+	        });
 	      } else {
 	        console.warn('Directive ' + this.id + ' is not valid');
 	      }
@@ -315,7 +323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'run',
 	    value: function run(left, top) {
-	      var _this = this;
+	      var _this2 = this;
 	
 	      // continue only if directive is enabled & valid:
 	      if (this.enabled && this.valid) {
@@ -325,72 +333,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        // verify there's such element:
 	        if (this.element) {
-	          // directive is in range:
-	          if (top >= this.top[0] && (top <= this.top[1] || !this.top[1]) || left >= this.left[0] && (left <= this.left[1] || !this.left[1])) {
-	            var _loop = function _loop(action) {
-	              if (_this.actions.hasOwnProperty(action)) {
-	                switch (action) {
-	                  case 'addClass':
-	                  case 'removeClass':
-	                    [].concat(_toConsumableArray(_this.element)).forEach(function (element) {
-	                      _this.actions[action].forEach(function (className) {
-	                        if (action === 'addClass') {
-	                          element.classList.add(className);
-	                        } else {
-	                          element.classList.remove(className);
-	                        }
-	                      });
-	                    });
-	                    break;
-	                  case 'setStyle':
-	                    var _loop2 = function _loop2(property) {
-	                      if (_this.actions[action].hasOwnProperty(property)) {
-	                        [].concat(_toConsumableArray(_this.element)).forEach(function (element) {
-	                          element.style[property] = typeof _this.actions[action][property] === 'function' ? _this.actions[action][property](left, top) : _this.actions[action][property];
-	                        });
-	                      }
-	                    };
-	
-	                    for (var property in _this.actions[action]) {
-	                      _loop2(property);
-	                    }
-	                    break;
-	                  case 'callFunction':
-	                    _this.actions[action](left, top);
-	                    break;
-	                }
-	              }
-	            };
-	
-	            for (var action in this.actions) {
-	              _loop(action);
-	            }
-	          }
-	          // directive is out of range:
-	          else {
-	              var _loop3 = function _loop3(action) {
-	                if (_this.actions.hasOwnProperty(action)) {
+	          this.timeline.forEach(function (scene) {
+	            // directive is in range:
+	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {
+	              var _loop = function _loop(action) {
+	                if (scene.actions.hasOwnProperty(action)) {
 	                  switch (action) {
 	                    case 'addClass':
 	                    case 'removeClass':
-	                      [].concat(_toConsumableArray(_this.element)).forEach(function (element) {
-	                        _this.actions[action].forEach(function (className) {
+	                      [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                        scene.actions[action].forEach(function (className) {
 	                          if (action === 'addClass') {
-	                            element.classList.remove(className);
-	                          } else {
 	                            element.classList.add(className);
+	                          } else {
+	                            element.classList.remove(className);
 	                          }
 	                        });
 	                      });
+	                      break;
+	                    case 'setStyle':
+	                      var _loop2 = function _loop2(property) {
+	                        if (scene.actions[action].hasOwnProperty(property)) {
+	                          [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                            element.style[property] = typeof scene.actions[action][property] === 'function' ? scene.actions[action][property](left, top) : scene.actions[action][property];
+	                          });
+	                        }
+	                      };
+	
+	                      for (var property in scene.actions[action]) {
+	                        _loop2(property);
+	                      }
+	                      break;
+	                    case 'callFunction':
+	                      scene.actions[action](left, top);
 	                      break;
 	                  }
 	                }
 	              };
 	
-	              for (var action in this.actions) {
-	                _loop3(action);
+	              for (var action in scene.actions) {
+	                _loop(action);
 	              }
 	            }
+	            // directive is out of range:
+	            else {
+	                var _loop3 = function _loop3(action) {
+	                  if (scene.actions.hasOwnProperty(action)) {
+	                    switch (action) {
+	                      case 'addClass':
+	                      case 'removeClass':
+	                        [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                          scene.actions[action].forEach(function (className) {
+	                            if (action === 'addClass') {
+	                              element.classList.remove(className);
+	                            } else {
+	                              element.classList.add(className);
+	                            }
+	                          });
+	                        });
+	                        break;
+	                    }
+	                  }
+	                };
+	
+	                for (var action in scene.actions) {
+	                  _loop3(action);
+	                }
+	              }
+	          });
 	        }
 	      }
 	    }
