@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parallax Demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Arima+Madurai" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+    }
+
+    section {
+      color: #fff;
+      font-family: 'Arima Madurai';
+      font-size: 4rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .slide-1 {
+      background-color: #64b5f6;
+      transition: color 500ms ease-in-out;
+    }
+
+    .slide-2 {
+      background-color: #ff4081;
+      font-size: 5rem;
+    }
+
+    .slide-3 {
+      background: transparent url(http://www.hdbloggers.net/wp-content/uploads/2016/01/Wallpapers-Desktop-Backgrounds.jpg) center center no-repeat;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .slide-4 {
+      color: #000;
+      height: 90vh;
+    }
+
+    .slide-5 {
+      background-color: #7cb342;
+    }
+
+    .fixed {
+      position: fixed;
+      bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 0;
+    }
+
+    .fixed + section {
+      margin-top: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+<section class="slide-1">
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium consequatur consequuntur cum dolor enim expedita in ipsa magnam magni minima nostrum, quae quaerat sapiente suscipit ullam vitae voluptate. Placeat, sapiente.
+</section>
+<section class="slide-2">
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet aspernatur aut autem commodi est eum officiis sunt tenetur vel velit. Accusantium amet aspernatur beatae, eos ipsum odio officiis possimus saepe.
+</section>
+<section class="slide-3">
+
+</section>
+<section class="slide-4">
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+</section>
+<section class="slide-5">
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequuntur, cupiditate doloremque error eum excepturi iusto, magni maxime molestiae molestias necessitatibus non obcaecati quaerat quia quisquam sint veritatis voluptatum. Perferendis, quo.
+</section>
+<script src="../dist/orchestrator.js"></script>
+<script>
+  window.addEventListener('load', function () {
+    let offsetTop = getCoords(document.querySelector('.slide-3')).top,
+      slide3Height = document.querySelector('.slide-3').offsetHeight,
+      windowHeight = window.innerHeight;
+
+    orchestrator.default.mode = 'scroll';
+    orchestrator.default.add({
+      selector: '.slide-3',
+      timeline: [
+        {
+          top: offsetTop,
+          actions: {
+            addClass: 'fixed'
+          }
+        },
+        {
+          top: offsetTop + slide3Height,
+          actions: {
+            setStyle: {
+              transform: function (left, top) {
+                return `translateY(${offsetTop + slide3Height - top}px)`;
+              }
+            }
+          }
+        }
+      ]
+    });
+
+    let p = orchestrator.default.add({
+      selector: '.slide-1',
+      timeline: [
+        {
+          top: [40, 100],
+          actions: {
+            setStyle: {
+              color: 'red'
+            }
+          }
+        }
+      ]
+    });
+  });
+
+  function getCoords(elem) {
+    let box = elem.getBoundingClientRect(),
+      elmBody = document.body,
+      elmDoc = document.documentElement,
+      intScrollTop = window.pageYOffset || elmDoc.scrollTop || elmBody.scrollTop,
+      intScrollLeft = window.pageXOffset || elmDoc.scrollLeft || elmBody.scrollLeft,
+      intClientTop = elmDoc.clientTop || elmBody.clientTop || 0,
+      intClientLeft = elmDoc.clientLeft || elmBody.clientLeft || 0,
+      intTop  = box.top +  intScrollTop - intClientTop,
+      intLeft = box.left + intScrollLeft - intClientLeft;
+
+    return { top: Math.round(intTop), left: Math.round(intLeft) };
+  }
+</script>
+</body>
+</html>

@@ -35,6 +35,7 @@ class Directive {
       this.selector = options.selector;
       this.element = document.querySelectorAll(options.selector);
       this.timeline = options.timeline;
+      this.style = [];
 
       // validate and format timeline array:
       this.timeline.forEach(scene => {
@@ -74,6 +75,21 @@ class Directive {
                   if (typeof scene.actions[action] !== 'object' || Object.keys(scene.actions[action]).length === 0) {
                     delete scene.actions[action];
                     console.warn(`Action ${action} of directive ${this.id} is not valid`);
+                  }
+
+                  // store current style:
+                  if (this.element) {
+                    [...this.element].forEach((element, index) => {
+                      let style = window.getComputedStyle(element),
+                        current = this.style && this.style.length > index && this.style[index] || {};
+
+                      Object.keys(scene.actions[action]).forEach(prop => {
+                        current[prop] = style.getPropertyValue(prop);
+                      });
+                      this.style.push(current);
+                    });
+
+                    console.log(this.style);
                   }
                   break;
                 case 'callFunction':
@@ -165,6 +181,15 @@ class Directive {
                         }
                       });
                     });
+                    break;
+                  case 'setStyle':
+                    for (let property in scene.actions[action]) {
+                      if (scene.actions[action].hasOwnProperty(property)) {
+                        [...this.element].forEach((element, index) => {
+                          element.style[property] = this.style[index][property];
+                        });
+                      }
+                    }
                     break;
                 }
               }

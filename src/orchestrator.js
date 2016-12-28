@@ -1,7 +1,144 @@
 import Directive from './directive';
-import directives from './directives';
 
 const orchestrator = {
+  /**
+   * Current
+   */
+  mode: 'scroll', // 'requestAnimationFrame' / 'scroll'
+
+  /**
+   * Indicates if orchestrator is currently active
+   * @type {boolean}
+   */
+  active: false,
+
+  /**
+   * Scroll callback function
+   * @type {function}
+   * @private
+   */
+  _scroll: window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    window.oRequestAnimationFrame ||
+    function (callback) { window.setTimeout(callback, 1000/60) },
+
+  /**
+   * Current H&V scrolls position
+   * @type [{number}, {number}]
+   * @private
+   */
+  _position: [-1, -1],
+
+  /**
+   * Directives collection
+   * @type [{Directive}]
+   * @private
+   */
+  _collection: [],
+
+  /**
+   * Object initialization
+   * @private
+   */
+  _init() {
+    this._run = this._run.bind(this);
+    // this._collection = new Proxy(this._data, {
+    //   deleteProperty: (target, property) => {
+    //     delete target[property];
+    //     if (target.length === 0) {
+    //       this._stop();
+    //     }
+    //     return true;
+    //   },
+    //   set: (target, property, value, receiver) => {
+    //     target[property] = value;
+    //     if (target.length > 0) {
+    //       this._start();
+    //     }
+    //     return true;
+    //   }
+    // });
+  },
+
+  /**
+   * Starts to track scrolls and call directives
+   * @private
+   */
+  _start() {
+    // add event listener:
+    switch (this.mode) {
+      case 'scroll':
+        window.addEventListener('scroll', this._run);
+        break;
+      case 'requestAnimationFrame':
+        this._scroll.call(window, this._run);
+        break;
+    }
+    // trigger scroll event to apply directives for current positions:
+    if (document.readyState !== 'complete') {
+      window.addEventListener('load', function () {
+        window.scrollTo(window.scrollX, window.scrollX);
+      });
+    }
+    else {
+      window.scrollTo(window.scrollX, window.scrollX);
+    }
+    // set active:
+    this.active = true;
+  },
+
+  /**
+   * Stops to track scrolls and call directives
+   * @private
+   */
+  _stop() {
+    // remove event listener:
+    if (this.mode === 'scroll') {
+      window.removeEventListener('scroll', this._run);
+    }
+    // set inactive:
+    this.active = false;
+  },
+
+  /**
+   * Starts or stops orchestrator depends on how many directives are active
+   * @private
+   */
+  _update() {
+    // stop if there are no directives or all of them are disabled:
+    if (this._collection.length === 0 || this._collection.every(directive => !directive.enabled)) {
+      this.active && this._stop();
+    }
+    else {
+      !this.active && this._start();
+    }
+  },
+
+  /**
+   *
+   * @private
+   */
+  _run: function () {
+    // position hasn't changed (optimization):
+    if (this._position[0] === window.pageXOffset && this._position[1] === window.pageYOffset) {
+      // re-run:
+      if (this.mode === 'requestAnimationFrame') {
+        this._scroll.call(window, this._run);
+      }
+      return false;
+    }
+
+    this._position = [window.pageXOffset, window.pageYOffset];
+    this._collection.forEach(p => p.run(this._position[0], this._position[1]));
+
+    // re-run:
+    if (this.mode === 'requestAnimationFrame') {
+      this._scroll.call(window, this._run);
+    }
+  },
+
   /**
    * Adds a new directive to collection
    * @param {string} [id] Directive unique ID
@@ -22,9 +159,10 @@ const orchestrator = {
 
     // create directive
     let directive = new Directive(id, options);
-    // add it to directives collection and return its id:
+    // add it to collection, upte status and return its id:
     if (directive.valid) {
-      directives.push(directive);
+      this._collection.push(directive);
+      this._update();
       return directive.id;
     }
   },
@@ -35,15 +173,20 @@ const orchestrator = {
    * Leave blank to delete all directives.
    */
   remove(...ids) {
-    // delete all:
+    // delete all & update status:
     if (ids.length === 0) {
-      directives.length = 0;
-      return false;
+      this._collection.length = 0;
+      this._update();
+      return true;
     }
 
-    // delete some by id:
+    // delete some by id & update status:
     ids.forEach(id => {
-      directives.slice(directives.findIndex(p => p.id === id), 1);
+      let index = this._collection.findIndex(p => p.id === id);
+      if (index) {
+        this._collection.splice(index, 1);
+        this._update();
+      }
     });
   },
 
@@ -53,10 +196,11 @@ const orchestrator = {
    * Leave blank to disable all directives.
    */
   disable(...ids) {
-    directives
+    this._collection
       .filter(p => ids.includes(p.id) || ids.length === 0)
       .forEach(p => {
-        p.disable()
+        p.disable();
+        this._update();
       });
   },
 
@@ -66,37 +210,16 @@ const orchestrator = {
    * Leave blank to enable all directives.
    */
   enable(...ids) {
-    directives
+    this._collection
       .filter(p => ids.includes(p.id) || ids.length === 0)
       .forEach(p => {
-        p.enable()
+        p.enable();
+        this._update();
       });
   }
 };
 
-let position = [-1, -1],
-  scroll = window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.mozRequestAnimationFrame ||
-  window.msRequestAnimationFrame ||
-  window.oRequestAnimationFrame ||
-  function (callback) { window.setTimeout(callback, 1000/60) };
-
-function run() {
-  // position hasn't changed (optimization):
-  if (position[0] === window.pageXOffset && position[1] === window.pageYOffset) {
-    scroll(run);
-    return false;
-  }
-  // store current scroll position:
-  position = [window.pageXOffset, window.pageYOffset];
-  // run each directive:
-  directives.forEach(p => p.run(position[0], position[1]));
-  // re-run:
-  scroll(run);
-}
-
-run();
+orchestrator._init();
 
 // export default orchestrator:
 export default orchestrator;

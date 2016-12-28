@@ -66,13 +66,152 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _directive2 = _interopRequireDefault(_directive);
 	
-	var _directives = __webpack_require__(2);
-	
-	var _directives2 = _interopRequireDefault(_directives);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var orchestrator = {
+	  /**
+	   * Current
+	   */
+	  mode: 'scroll', // 'requestAnimationFrame' / 'scroll'
+	
+	  /**
+	   * Indicates if orchestrator is currently active
+	   * @type {boolean}
+	   */
+	  active: false,
+	
+	  /**
+	   * Scroll callback function
+	   * @type {function}
+	   * @private
+	   */
+	  _scroll: window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame || function (callback) {
+	    window.setTimeout(callback, 1000 / 60);
+	  },
+	
+	  /**
+	   * Current H&V scrolls position
+	   * @type [{number}, {number}]
+	   * @private
+	   */
+	  _position: [-1, -1],
+	
+	  /**
+	   * Directives collection
+	   * @type [{Directive}]
+	   * @private
+	   */
+	  _collection: [],
+	
+	  /**
+	   * Object initialization
+	   * @private
+	   */
+	  _init: function _init() {
+	    this._run = this._run.bind(this);
+	    // this._collection = new Proxy(this._data, {
+	    //   deleteProperty: (target, property) => {
+	    //     delete target[property];
+	    //     if (target.length === 0) {
+	    //       this._stop();
+	    //     }
+	    //     return true;
+	    //   },
+	    //   set: (target, property, value, receiver) => {
+	    //     target[property] = value;
+	    //     if (target.length > 0) {
+	    //       this._start();
+	    //     }
+	    //     return true;
+	    //   }
+	    // });
+	  },
+	
+	
+	  /**
+	   * Starts to track scrolls and call directives
+	   * @private
+	   */
+	  _start: function _start() {
+	    // add event listener:
+	    switch (this.mode) {
+	      case 'scroll':
+	        window.addEventListener('scroll', this._run);
+	        break;
+	      case 'requestAnimationFrame':
+	        this._scroll.call(window, this._run);
+	        break;
+	    }
+	    // trigger scroll event to apply directives for current positions:
+	    if (document.readyState !== 'complete') {
+	      window.addEventListener('load', function () {
+	        window.scrollTo(window.scrollX, window.scrollX);
+	      });
+	    } else {
+	      window.scrollTo(window.scrollX, window.scrollX);
+	    }
+	    // set active:
+	    this.active = true;
+	  },
+	
+	
+	  /**
+	   * Stops to track scrolls and call directives
+	   * @private
+	   */
+	  _stop: function _stop() {
+	    // remove event listener:
+	    if (this.mode === 'scroll') {
+	      window.removeEventListener('scroll', this._run);
+	    }
+	    // set inactive:
+	    this.active = false;
+	  },
+	
+	
+	  /**
+	   * Starts or stops orchestrator depends on how many directives are active
+	   * @private
+	   */
+	  _update: function _update() {
+	    // stop if there are no directives or all of them are disabled:
+	    if (this._collection.length === 0 || this._collection.every(function (directive) {
+	      return !directive.enabled;
+	    })) {
+	      this.active && this._stop();
+	    } else {
+	      !this.active && this._start();
+	    }
+	  },
+	
+	
+	  /**
+	   *
+	   * @private
+	   */
+	  _run: function _run() {
+	    var _this = this;
+	
+	    // position hasn't changed (optimization):
+	    if (this._position[0] === window.pageXOffset && this._position[1] === window.pageYOffset) {
+	      // re-run:
+	      if (this.mode === 'requestAnimationFrame') {
+	        this._scroll.call(window, this._run);
+	      }
+	      return false;
+	    }
+	
+	    this._position = [window.pageXOffset, window.pageYOffset];
+	    this._collection.forEach(function (p) {
+	      return p.run(_this._position[0], _this._position[1]);
+	    });
+	
+	    // re-run:
+	    if (this.mode === 'requestAnimationFrame') {
+	      this._scroll.call(window, this._run);
+	    }
+	  },
+	
 	  /**
 	   * Adds a new directive to collection
 	   * @param {string} [id] Directive unique ID
@@ -93,9 +232,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // create directive
 	    var directive = new _directive2.default(id, options);
-	    // add it to directives collection and return its id:
+	    // add it to collection, upte status and return its id:
 	    if (directive.valid) {
-	      _directives2.default.push(directive);
+	      this._collection.push(directive);
+	      this._update();
 	      return directive.id;
 	    }
 	  },
@@ -107,21 +247,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Leave blank to delete all directives.
 	   */
 	  remove: function remove() {
+	    var _this2 = this;
+	
 	    for (var _len = arguments.length, ids = Array(_len), _key = 0; _key < _len; _key++) {
 	      ids[_key] = arguments[_key];
 	    }
 	
-	    // delete all:
+	    // delete all & update status:
 	    if (ids.length === 0) {
-	      _directives2.default.length = 0;
-	      return false;
+	      this._collection.length = 0;
+	      this._update();
+	      return true;
 	    }
 	
-	    // delete some by id:
+	    // delete some by id & update status:
 	    ids.forEach(function (id) {
-	      _directives2.default.slice(_directives2.default.findIndex(function (p) {
+	      var index = _this2._collection.findIndex(function (p) {
 	        return p.id === id;
-	      }), 1);
+	      });
+	      if (index) {
+	        _this2._collection.splice(index, 1);
+	        _this2._update();
+	      }
 	    });
 	  },
 	
@@ -132,14 +279,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Leave blank to disable all directives.
 	   */
 	  disable: function disable() {
+	    var _this3 = this;
+	
 	    for (var _len2 = arguments.length, ids = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
 	      ids[_key2] = arguments[_key2];
 	    }
 	
-	    _directives2.default.filter(function (p) {
+	    this._collection.filter(function (p) {
 	      return ids.includes(p.id) || ids.length === 0;
 	    }).forEach(function (p) {
 	      p.disable();
+	      _this3._update();
 	    });
 	  },
 	
@@ -150,40 +300,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Leave blank to enable all directives.
 	   */
 	  enable: function enable() {
+	    var _this4 = this;
+	
 	    for (var _len3 = arguments.length, ids = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
 	      ids[_key3] = arguments[_key3];
 	    }
 	
-	    _directives2.default.filter(function (p) {
+	    this._collection.filter(function (p) {
 	      return ids.includes(p.id) || ids.length === 0;
 	    }).forEach(function (p) {
 	      p.enable();
+	      _this4._update();
 	    });
 	  }
 	};
 	
-	var position = [-1, -1],
-	    scroll = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame || function (callback) {
-	  window.setTimeout(callback, 1000 / 60);
-	};
-	
-	function run() {
-	  // position hasn't changed (optimization):
-	  if (position[0] === window.pageXOffset && position[1] === window.pageYOffset) {
-	    scroll(run);
-	    return false;
-	  }
-	  // store current scroll position:
-	  position = [window.pageXOffset, window.pageYOffset];
-	  // run each directive:
-	  _directives2.default.forEach(function (p) {
-	    return p.run(position[0], position[1]);
-	  });
-	  // re-run:
-	  scroll(run);
-	}
-	
-	run();
+	orchestrator._init();
 	
 	// export default orchestrator:
 	exports.default = orchestrator;
@@ -257,6 +389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.selector = options.selector;
 	        this.element = document.querySelectorAll(options.selector);
 	        this.timeline = options.timeline;
+	        this.style = [];
 	
 	        // validate and format timeline array:
 	        this.timeline.forEach(function (scene) {
@@ -269,7 +402,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            scene.left = Array.isArray(scene.left) ? scene.left : [scene.left, null];
 	
 	            // now check actions object:
-	            for (var action in scene.actions) {
+	
+	            var _loop = function _loop(action) {
 	              if (scene.actions.hasOwnProperty(action)) {
 	                switch (action) {
 	                  case 'addClass':
@@ -297,6 +431,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      delete scene.actions[action];
 	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
 	                    }
+	
+	                    // store current style:
+	                    if (_this.element) {
+	                      [].concat(_toConsumableArray(_this.element)).forEach(function (element, index) {
+	                        var style = window.getComputedStyle(element),
+	                            current = _this.style && _this.style.length > index && _this.style[index] || {};
+	
+	                        Object.keys(scene.actions[action]).forEach(function (prop) {
+	                          current[prop] = style.getPropertyValue(prop);
+	                        });
+	                        _this.style.push(current);
+	                      });
+	
+	                      console.log(_this.style);
+	                    }
 	                    break;
 	                  case 'callFunction':
 	                    if (typeof scene.method !== 'function') {
@@ -313,6 +462,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	              } else {
 	                console.warn('Directive ' + _this.id + ' has no valid actions');
 	              }
+	            };
+	
+	            for (var action in scene.actions) {
+	              _loop(action);
 	            }
 	          }
 	        });
@@ -336,7 +489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          this.timeline.forEach(function (scene) {
 	            // directive is in range:
 	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {
-	              var _loop = function _loop(action) {
+	              var _loop2 = function _loop2(action) {
 	                if (scene.actions.hasOwnProperty(action)) {
 	                  switch (action) {
 	                    case 'addClass':
@@ -352,7 +505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      });
 	                      break;
 	                    case 'setStyle':
-	                      var _loop2 = function _loop2(property) {
+	                      var _loop3 = function _loop3(property) {
 	                        if (scene.actions[action].hasOwnProperty(property)) {
 	                          [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
 	                            element.style[property] = typeof scene.actions[action][property] === 'function' ? scene.actions[action][property](left, top) : scene.actions[action][property];
@@ -361,7 +514,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      };
 	
 	                      for (var property in scene.actions[action]) {
-	                        _loop2(property);
+	                        _loop3(property);
 	                      }
 	                      break;
 	                    case 'callFunction':
@@ -372,12 +525,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	              };
 	
 	              for (var action in scene.actions) {
-	                _loop(action);
+	                _loop2(action);
 	              }
 	            }
 	            // directive is out of range:
 	            else {
-	                var _loop3 = function _loop3(action) {
+	                var _loop4 = function _loop4(action) {
 	                  if (scene.actions.hasOwnProperty(action)) {
 	                    switch (action) {
 	                      case 'addClass':
@@ -392,12 +545,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	                          });
 	                        });
 	                        break;
+	                      case 'setStyle':
+	                        var _loop5 = function _loop5(property) {
+	                          if (scene.actions[action].hasOwnProperty(property)) {
+	                            [].concat(_toConsumableArray(_this2.element)).forEach(function (element, index) {
+	                              element.style[property] = _this2.style[index][property];
+	                            });
+	                          }
+	                        };
+	
+	                        for (var property in scene.actions[action]) {
+	                          _loop5(property);
+	                        }
+	                        break;
 	                    }
 	                  }
 	                };
 	
 	                for (var action in scene.actions) {
-	                  _loop3(action);
+	                  _loop4(action);
 	                }
 	              }
 	          });
@@ -410,22 +576,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	exports.default = Directive;
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	/**
-	 * Created by nirelbaz on 21/12/2016.
-	 */
-	var directives = [];
-	
-	exports.default = directives;
 
 /***/ }
 /******/ ])

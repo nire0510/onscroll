@@ -20,7 +20,7 @@ Bower: `bower install orchestrator --save`
 
 ## Usage:
 1. Add a reference to **orchestrator** library to your web page:  
-`<script src='bower_components/orchestrator/orchestrator.min.js'></script>`
+`<script src='bower_components/orchestrator/dist/orchestrator.min.js'></script>`
 2. Add one or more directives:  
  ```javascript
 let directiveId = orchestrator.default.add({
