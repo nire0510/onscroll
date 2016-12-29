@@ -156,6 +156,9 @@ const orchestrator = {
       options = id;
       id = null;
     }
+    else {
+      this.remove(id);
+    }
 
     // create directive
     let directive = new Directive(id, options);

@@ -228,6 +228,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    else if (!options) {
 	        options = id;
 	        id = null;
+	      } else {
+	        this.remove(id);
 	      }
 	
 	    // create directive
