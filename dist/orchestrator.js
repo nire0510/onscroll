@@ -498,6 +498,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // verify there's such element:
 	        if (this.element && this.element.length > 0) {
 	          this.timeline.forEach(function (scene) {
+	            if (shouldGetStyle) {
+	              // store current style:
+	              _this3.getCurrentStyle(scene);
+	            }
 	            // directive is in range:
 	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {
 	              var _loop = function _loop(action) {
@@ -516,12 +520,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      });
 	                      break;
 	                    case 'setStyle':
-	                      if (shouldGetStyle) {
-	                        // store current style:
-	                        _this3.getCurrentStyle(scene);
-	                        shouldGetStyle = false;
-	                      }
-	
 	                      var _loop2 = function _loop2(property) {
 	                        if (scene.actions[action].hasOwnProperty(property)) {
 	                          [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
@@ -584,6 +582,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	              }
 	          });
+	          shouldGetStyle = false;
 	        }
 	      }
 	    }
