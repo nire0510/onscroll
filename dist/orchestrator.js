@@ -267,7 +267,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var index = _this2._collection.findIndex(function (p) {
 	        return p.id === id;
 	      });
-	      if (index) {
+	      if (index >= 0) {
 	        _this2._collection.splice(index, 1);
 	        _this2._update();
 	      }

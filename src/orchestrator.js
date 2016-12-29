@@ -186,7 +186,7 @@ const orchestrator = {
     // delete some by id & update status:
     ids.forEach(id => {
       let index = this._collection.findIndex(p => p.id === id);
-      if (index) {
+      if (index >= 0) {
         this._collection.splice(index, 1);
         this._update();
       }
