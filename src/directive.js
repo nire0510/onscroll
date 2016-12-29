@@ -136,6 +136,10 @@ class Directive {
       // verify there's such element:
       if (this.element && this.element.length > 0) {
         this.timeline.forEach(scene => {
+          if (shouldGetStyle) {
+            // store current style:
+            this.getCurrentStyle(scene);
+          }
           // directive is in range:
           if ((top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1])) ||
             (left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1]))) {
@@ -156,11 +160,6 @@ class Directive {
                     });
                     break;
                   case 'setStyle':
-                    if (shouldGetStyle) {
-                      // store current style:
-                      this.getCurrentStyle(scene);
-                      shouldGetStyle = false;
-                    }
                     for (let property in scene.actions[action]) {
                       if (scene.actions[action].hasOwnProperty(property)) {
                         [...this.element].forEach(element => {
@@ -210,6 +209,7 @@ class Directive {
             }
           }
         });
+        shouldGetStyle = false;
       }
     }
   }
