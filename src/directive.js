@@ -78,19 +78,7 @@ class Directive {
                   }
 
                   // store current style:
-                  if (this.element) {
-                    [...this.element].forEach((element, index) => {
-                      let style = window.getComputedStyle(element),
-                        current = this.style && this.style.length > index && this.style[index] || {};
-
-                      Object.keys(scene.actions[action]).forEach(prop => {
-                        current[prop] = style.getPropertyValue(prop);
-                      });
-                      this.style.push(current);
-                    });
-
-                    console.log(this.style);
-                  }
+                  this.getCurrentStyle(scene);
                   break;
                 case 'callFunction':
                   if (typeof scene.method !== 'function') {
@@ -117,12 +105,33 @@ class Directive {
     }
   }
 
+  /**
+   * Stores element's current style for reset when scroll not in range
+   * @param {object} scene Timeline scene
+   */
+  getCurrentStyle(scene) {
+    if (this.element) {
+      [...this.element].forEach((element, index) => {
+        let style = window.getComputedStyle(element),
+          current = this.style && this.style.length > index && this.style[index] || {};
+
+        Object.keys(scene.actions.setStyle).forEach(prop => {
+          current[prop] = style.getPropertyValue(prop);
+        });
+        this.style.push(current);
+      });
+    }
+  }
+
   run(left, top) {
+    let shouldGetStyle = false;
+
     // continue only if directive is enabled & valid:
     if (this.enabled && this.valid) {
       // if element is empty, find and cache it:
       if (!this.element) {
         this.element = document.querySelectorAll(this.selector);
+        shouldGetStyle = true;
       }
       // verify there's such element:
       if (this.element) {
@@ -147,6 +156,11 @@ class Directive {
                     });
                     break;
                   case 'setStyle':
+                    if (shouldGetStyle) {
+                      // store current style:
+                      this.getCurrentStyle(scene);
+                      shouldGetStyle = false;
+                    }
                     for (let property in scene.actions[action]) {
                       if (scene.actions[action].hasOwnProperty(property)) {
                         [...this.element].forEach(element => {

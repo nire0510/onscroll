@@ -402,8 +402,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            scene.left = Array.isArray(scene.left) ? scene.left : [scene.left, null];
 	
 	            // now check actions object:
-	
-	            var _loop = function _loop(action) {
+	            for (var action in scene.actions) {
 	              if (scene.actions.hasOwnProperty(action)) {
 	                switch (action) {
 	                  case 'addClass':
@@ -433,19 +432,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	
 	                    // store current style:
-	                    if (_this.element) {
-	                      [].concat(_toConsumableArray(_this.element)).forEach(function (element, index) {
-	                        var style = window.getComputedStyle(element),
-	                            current = _this.style && _this.style.length > index && _this.style[index] || {};
-	
-	                        Object.keys(scene.actions[action]).forEach(function (prop) {
-	                          current[prop] = style.getPropertyValue(prop);
-	                        });
-	                        _this.style.push(current);
-	                      });
-	
-	                      console.log(_this.style);
-	                    }
+	                    _this.getCurrentStyle(scene);
 	                    break;
 	                  case 'callFunction':
 	                    if (typeof scene.method !== 'function') {
@@ -462,10 +449,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	              } else {
 	                console.warn('Directive ' + _this.id + ' has no valid actions');
 	              }
-	            };
-	
-	            for (var action in scene.actions) {
-	              _loop(action);
 	            }
 	          }
 	        });
@@ -473,28 +456,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	        console.warn('Directive ' + this.id + ' is not valid');
 	      }
 	    }
+	
+	    /**
+	     * Stores element's current style for reset when scroll not in range
+	     * @param {object} scene Timeline scene
+	     */
+	
+	  }, {
+	    key: 'getCurrentStyle',
+	    value: function getCurrentStyle(scene) {
+	      var _this2 = this;
+	
+	      if (this.element) {
+	        [].concat(_toConsumableArray(this.element)).forEach(function (element, index) {
+	          var style = window.getComputedStyle(element),
+	              current = _this2.style && _this2.style.length > index && _this2.style[index] || {};
+	
+	          Object.keys(scene.actions.setStyle).forEach(function (prop) {
+	            current[prop] = style.getPropertyValue(prop);
+	          });
+	          _this2.style.push(current);
+	        });
+	      }
+	    }
 	  }, {
 	    key: 'run',
 	    value: function run(left, top) {
-	      var _this2 = this;
+	      var _this3 = this;
+	
+	      var shouldGetStyle = false;
 	
 	      // continue only if directive is enabled & valid:
 	      if (this.enabled && this.valid) {
 	        // if element is empty, find and cache it:
 	        if (!this.element) {
 	          this.element = document.querySelectorAll(this.selector);
+	          shouldGetStyle = true;
 	        }
 	        // verify there's such element:
 	        if (this.element) {
 	          this.timeline.forEach(function (scene) {
 	            // directive is in range:
 	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {
-	              var _loop2 = function _loop2(action) {
+	              var _loop = function _loop(action) {
 	                if (scene.actions.hasOwnProperty(action)) {
 	                  switch (action) {
 	                    case 'addClass':
 	                    case 'removeClass':
-	                      [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                      [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
 	                        scene.actions[action].forEach(function (className) {
 	                          if (action === 'addClass') {
 	                            element.classList.add(className);
@@ -505,16 +514,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      });
 	                      break;
 	                    case 'setStyle':
-	                      var _loop3 = function _loop3(property) {
+	                      if (shouldGetStyle) {
+	                        // store current style:
+	                        _this3.getCurrentStyle(scene);
+	                        shouldGetStyle = false;
+	                      }
+	
+	                      var _loop2 = function _loop2(property) {
 	                        if (scene.actions[action].hasOwnProperty(property)) {
-	                          [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                          [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
 	                            element.style[property] = typeof scene.actions[action][property] === 'function' ? scene.actions[action][property](left, top) : scene.actions[action][property];
 	                          });
 	                        }
 	                      };
 	
 	                      for (var property in scene.actions[action]) {
-	                        _loop3(property);
+	                        _loop2(property);
 	                      }
 	                      break;
 	                    case 'callFunction':
@@ -525,17 +540,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	              };
 	
 	              for (var action in scene.actions) {
-	                _loop2(action);
+	                _loop(action);
 	              }
 	            }
 	            // directive is out of range:
 	            else {
-	                var _loop4 = function _loop4(action) {
+	                var _loop3 = function _loop3(action) {
 	                  if (scene.actions.hasOwnProperty(action)) {
 	                    switch (action) {
 	                      case 'addClass':
 	                      case 'removeClass':
-	                        [].concat(_toConsumableArray(_this2.element)).forEach(function (element) {
+	                        [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
 	                          scene.actions[action].forEach(function (className) {
 	                            if (action === 'addClass') {
 	                              element.classList.remove(className);
@@ -546,16 +561,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        });
 	                        break;
 	                      case 'setStyle':
-	                        var _loop5 = function _loop5(property) {
+	                        var _loop4 = function _loop4(property) {
 	                          if (scene.actions[action].hasOwnProperty(property)) {
-	                            [].concat(_toConsumableArray(_this2.element)).forEach(function (element, index) {
-	                              element.style[property] = _this2.style[index][property];
+	                            [].concat(_toConsumableArray(_this3.element)).forEach(function (element, index) {
+	                              element.style[property] = _this3.style[index][property];
 	                            });
 	                          }
 	                        };
 	
 	                        for (var property in scene.actions[action]) {
-	                          _loop5(property);
+	                          _loop4(property);
 	                        }
 	                        break;
 	                    }
@@ -563,7 +578,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                };
 	
 	                for (var action in scene.actions) {
-	                  _loop4(action);
+	                  _loop3(action);
 	                }
 	              }
 	          });
