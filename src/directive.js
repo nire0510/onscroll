@@ -110,7 +110,7 @@ class Directive {
    * @param {object} scene Timeline scene
    */
   getCurrentStyle(scene) {
-    if (this.element) {
+    if (this.element && this.element.length > 0) {
       [...this.element].forEach((element, index) => {
         let style = window.getComputedStyle(element),
           current = this.style && this.style.length > index && this.style[index] || {};
@@ -129,12 +129,12 @@ class Directive {
     // continue only if directive is enabled & valid:
     if (this.enabled && this.valid) {
       // if element is empty, find and cache it:
-      if (!this.element) {
+      if (!this.element || this.element.length === 0) {
         this.element = document.querySelectorAll(this.selector);
         shouldGetStyle = true;
       }
       // verify there's such element:
-      if (this.element) {
+      if (this.element && this.element.length > 0) {
         this.timeline.forEach(scene => {
           // directive is in range:
           if ((top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1])) ||

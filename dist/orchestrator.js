@@ -467,7 +467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function getCurrentStyle(scene) {
 	      var _this2 = this;
 	
-	      if (this.element) {
+	      if (this.element && this.element.length > 0) {
 	        [].concat(_toConsumableArray(this.element)).forEach(function (element, index) {
 	          var style = window.getComputedStyle(element),
 	              current = _this2.style && _this2.style.length > index && _this2.style[index] || {};
@@ -489,12 +489,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // continue only if directive is enabled & valid:
 	      if (this.enabled && this.valid) {
 	        // if element is empty, find and cache it:
-	        if (!this.element) {
+	        if (!this.element || this.element.length === 0) {
 	          this.element = document.querySelectorAll(this.selector);
 	          shouldGetStyle = true;
 	        }
 	        // verify there's such element:
-	        if (this.element) {
+	        if (this.element && this.element.length > 0) {
 	          this.timeline.forEach(function (scene) {
 	            // directive is in range:
 	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {

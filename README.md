@@ -1,6 +1,6 @@
 # Orchestrator
 
-Directs web page elements to produce a desired effect.
+Makes your web page dance on scroll
 
 <!--[![Travis build status](http://img.shields.io/travis/nire0510/orchestrator.svg?style=flat)](https://travis-ci.org/nire0510/orchestrator)-->
 <!--[![Code Climate](https://codeclimate.com/github/nire0510/orchestrator/badges/gpa.svg)](https://codeclimate.com/github/nire0510/orchestrator)-->
@@ -12,7 +12,7 @@ Directs web page elements to produce a desired effect.
 Many web pages these days produce the "wow effect" by triggering transitions and animations based on scroll position.
 Though it might look good, naive implementation can affect performance and lead to a bad user experience.  
 With page performance in mind, Orchestrator can help you achieve this behaviour with a single command in three flavors:
-basic, moderate & advance.  
+basic, moderate & advance. 
 
 ## Installation:
 Bower: `bower install orchestrator --save`  
