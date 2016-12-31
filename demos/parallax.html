@@ -81,13 +81,13 @@
       slide3Height = document.querySelector('.slide-3').offsetHeight,
       windowHeight = window.innerHeight;
 
-    new Orchestrator.default({
+    new Orchestrator({
       selector: '.slide-3',
       top: offsetTop,
       addClass: 'fixed'
     });
 
-    new Orchestrator.default({
+    new Orchestrator({
       selector: '.slide-3',
       top: offsetTop + slide3Height,
       setStyle: {
@@ -97,7 +97,7 @@
       }
     });
 
-    new Orchestrator.default({
+    new Orchestrator({
       selector: '.slide-1',
       top: {
         from: 40,

@@ -56,10 +56,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
 	var _collection = __webpack_require__(1);
 	
 	var _collection2 = _interopRequireDefault(_collection);
@@ -135,7 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 	
 	// export default orchestrator:
-	exports.default = _orchestrator2.default;
+	module.exports = _orchestrator2.default;
 
 /***/ },
 /* 1 */

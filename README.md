@@ -20,9 +20,9 @@ Bower: `bower install orchestrator --save`
 ## Usage:
 1. Add a reference to **orchestrator** library to your web page:  
 `<script src='bower_components/orchestrator/dist/orchestrator.min.js'></script>`
-2. Create orchestrator:  
+2. Create a new orchestrator instance:  
  ```javascript
-let obj = new Orchestrator.default({
+let obj = new Orchestrator({
   // {string} CSS3 selector or multiple comma separated selectors: 
   selector: '.first-selector, #second-selector',
     
@@ -73,7 +73,7 @@ let obj = new Orchestrator.default({
 Use `addClass` and `removeClass` when you want to set or unset CSS properties with fixed values.
 This is done by adding or removing class name(s) to element(s).
 ```javascript
-new Orchestrator.default({
+new Orchestrator({
   selector: '.some-element',
   top: 20,
   // value can be either string in case of a single class name to add:
@@ -91,7 +91,7 @@ This is done by setting inline style to elements. Each property in object is a C
 with two arguments, `left` (current horizontal scroll position) and `top` (current vertical scroll position),
 which can be used for calculating the function's return value - the value of CSS property. 
 ```javascript
-new Orchestrator.default({
+new Orchestrator({
   selector: '.some-element',
   top: 20,
   setStyle: {
@@ -110,7 +110,7 @@ Use `callFunction` when you not necessarily want to manipulate style, but rather
 execute JavaScript etc. The action's value is a function with two arguments,
 `left` (current horizontal scroll position) and `top` (current vertical scroll position) which should not return any value.
 ```javascript
-new Orchestrator.default({
+new Orchestrator({
   selector: '.some-element',
   top: 20,
   callFunction: function (left, top) {
@@ -122,5 +122,5 @@ new Orchestrator.default({
 ```
 
 ## More Commands
-* `obj.disable()` - disables orchestrator.
-* `obj.enable()` - enables orchestrator.
+* `obj.disable()` - disables orchestrator instance.
+* `obj.enable()` - enables orchestrator instance.
