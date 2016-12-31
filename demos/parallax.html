@@ -81,41 +81,31 @@
       slide3Height = document.querySelector('.slide-3').offsetHeight,
       windowHeight = window.innerHeight;
 
-    orchestrator.default.mode = 'scroll';
-    orchestrator.default.add({
+    new Orchestrator.default({
       selector: '.slide-3',
-      timeline: [
-        {
-          top: offsetTop,
-          actions: {
-            addClass: 'fixed'
-          }
-        },
-        {
-          top: offsetTop + slide3Height,
-          actions: {
-            setStyle: {
-              transform: function (left, top) {
-                return `translateY(${offsetTop + slide3Height - top}px)`;
-              }
-            }
-          }
-        }
-      ]
+      top: offsetTop,
+      addClass: 'fixed'
     });
 
-    let p = orchestrator.default.add({
-      selector: '.slide-7',
-      timeline: [
-        {
-          top: [40, 100],
-          actions: {
-            setStyle: {
-              color: 'red'
-            }
-          }
+    new Orchestrator.default({
+      selector: '.slide-3',
+      top: offsetTop + slide3Height,
+      setStyle: {
+        transform: function (left, top) {
+          return `translateY(${offsetTop + slide3Height - top}px)`;
         }
-      ]
+      }
+    });
+
+    new Orchestrator.default({
+      selector: '.slide-1',
+      top: {
+        from: 40,
+        to: 240
+      },
+      setStyle: {
+        color: 'red'
+      }
     });
   });
 

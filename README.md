@@ -10,9 +10,8 @@ Makes your web page dance on scroll
 
 ## Introduction
 Many web pages these days produce the "wow effect" by triggering transitions and animations based on scroll position.
-Though it might look good, naive implementation can affect performance and lead to a bad user experience.  
-With page performance in mind, Orchestrator can help you achieve this behaviour with a single command in three flavors:
-basic, moderate & advance. 
+Though it might look good, it may require massive coding, plus - naive implementation can affect performance and lead to a bad user experience.  
+With page performance in mind, Orchestrator can help you achieve this behaviour with a single command.
 
 ## Installation:
 Bower: `bower install orchestrator --save`  
@@ -21,75 +20,68 @@ Bower: `bower install orchestrator --save`
 ## Usage:
 1. Add a reference to **orchestrator** library to your web page:  
 `<script src='bower_components/orchestrator/dist/orchestrator.min.js'></script>`
-2. Add one or more directives:  
+2. Create orchestrator:  
  ```javascript
-let directiveId = orchestrator.default.add({
+let obj = new Orchestrator.default({
   // {string} CSS3 selector or multiple comma separated selectors: 
   selector: '.first-selector, #second-selector',
     
-  // [{object}] array of scenes, each scene contains left / top scroll position which actions should be applied:
-  timeline: [
-    {
-      // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
-      // or
-      // [{number}, {number}] horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
-      left: 20,
-      
-      // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
-      // or
-      // [{number}, {number}] vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
-      top: 20,
+  // {number} horizontal scroll (X axis) position in pixels from which to apply the actions
+  // or
+  // {from: {number}, to: {number}} horizontal scroll (X axis) min & max positions in pixels to apply the actions: 
+  left: 20,
+  //left: {
+  //  from: 20,
+  //  to: 100
+  //},
+  
+  // {number} vertical scroll (Y axis) position in pixels from which to apply the actions
+  // or
+  // {from: {number}, to: {number}} vertical scroll (Y axis) min & max positions in pixels to apply the actions: 
+  top: 20,
+  //top: {
+  //  from: 20,
+  //  to: 100
+  //},
 
-      // one or more actions to apply:
-      actions: {
-        // add one or more class names:
-        addClass: 'gold',
-        
-        // remove one or more class names:
-        removeClass: ['opacity', 'double-padding'],
-        
-        // set inline style:
-        setStyle: {
-          transform: function(left, top) {
-            return `translateY(${20 - top}px)`;
-          },
-          paddingLeft: function(left/*, top*/) {
-            return `${left}px`;
-          }
-        },
-        
-        // call a function:
-        callFunction: function(/*left, top*/) {
-          this.revealPopup();
-        }
-      }
+  // add one or more class names:
+  addClass: 'gold',
+  //addClass: ['yellow', 'bold'],
+    
+  // remove one or more class names:
+  removeClass: 'center',
+  //removeClass: ['opacity', 'double-padding'],
+    
+  // set inline style:
+  setStyle: {
+    transform: function(left, top) {
+      return `translateY(${20 - top}px)`;
+    },
+    paddingLeft: function(left/*, top*/) {
+      return `${left}px`;
     }
-  ]
+  },
+    
+  // call a function:
+  callFunction: function(/*left, top*/) {
+    this.revealPopup();
+  }
 });
 ```
-The return value is the directive auto-generated id.
-If you want name it yourself, do as follows:
-`orchestrator.default.add('my-directive', {/*...*/});`
 
 ### Basic
 Use `addClass` and `removeClass` when you want to set or unset CSS properties with fixed values.
 This is done by adding or removing class name(s) to element(s).
 ```javascript
-orchestrator.default.add({
+new Orchestrator.default({
   selector: '.some-element',
-  timeline: [
-    {
-      top: 20,
-      actions: {
-        // value can be either string in case of a single class name to add:
-        addClass: 'gold'
-        // or an array in case of multiple class names to add:
-        //addClass: ['gold', 'double-spacing'],
-        // to remove one or more class names, use the -removeClass- action:
-        //removeClass: 'gold'
-      }
-    }
-  ]
+  top: 20,
+  // value can be either string in case of a single class name to add:
+  addClass: 'gold'
+  // or an array in case of multiple class names to add:
+  //addClass: ['gold', 'double-spacing'],
+  // to remove one or more class names, use the -removeClass- action:
+  //removeClass: 'gold'
 });
 ```
 
@@ -99,23 +91,17 @@ This is done by setting inline style to elements. Each property in object is a C
 with two arguments, `left` (current horizontal scroll position) and `top` (current vertical scroll position),
 which can be used for calculating the function's return value - the value of CSS property. 
 ```javascript
-orchestrator.default.add({
+new Orchestrator.default({
   selector: '.some-element',
-  timeline: [
-    {
-      top: 20,
-      actions: {
-        setStyle: {
-          transform: function(left, top) {
-            return `translateY(${20 - top}px)`;
-          },
-          paddingLeft: function(left/*, top*/) {
-            return `${left}px`;
-          }
-        },
-      }
+  top: 20,
+  setStyle: {
+    transform: function(left, top) {
+      return `translateY(${20 - top}px)`;
+    },
+    paddingLeft: function(left/*, top*/) {
+      return `${left}px`;
     }
-  ]
+  }
 });
 ```
 
@@ -124,24 +110,17 @@ Use `callFunction` when you not necessarily want to manipulate style, but rather
 execute JavaScript etc. The action's value is a function with two arguments,
 `left` (current horizontal scroll position) and `top` (current vertical scroll position) which should not return any value.
 ```javascript
-orchestrator.default.add({
+new Orchestrator.default({
   selector: '.some-element',
-  timeline: [
-    {
-      top: 20,
-      actions: {
-        callFunction: function (left, top) {
-          if (left > 100) {
-            submitForm();          
-          }
-        }
-      }
+  top: 20,
+  callFunction: function (left, top) {
+    if (left > 100) {
+      submitForm();          
     }
-  ]
+  }
 });
 ```
 
 ## More Commands
-* `orchestrator.default.remove(id, id, ...)` - removes one or more directives.
-* `orchestrator.default.disable(id, id, ...)` - disables one or more directives.
-* `orchestrator.default.enable(id, id, ...)` - enables one or more directives.
+* `obj.disable()` - disables orchestrator.
+* `obj.enable()` - enables orchestrator.

@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["orchestrator"] = factory();
+		exports["Orchestrator"] = factory();
 	else
-		root["orchestrator"] = factory();
+		root["Orchestrator"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -60,271 +60,102 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	var _collection = __webpack_require__(1);
 	
-	var _directive = __webpack_require__(1);
+	var _collection2 = _interopRequireDefault(_collection);
 	
-	var _directive2 = _interopRequireDefault(_directive);
+	var _orchestrator = __webpack_require__(2);
+	
+	var _orchestrator2 = _interopRequireDefault(_orchestrator);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var orchestrator = {
-	  /**
-	   * Current
-	   */
-	  mode: 'scroll', // 'requestAnimationFrame' / 'scroll'
-	
-	  /**
-	   * Indicates if orchestrator is currently active
-	   * @type {boolean}
-	   */
-	  active: false,
-	
-	  /**
-	   * Scroll callback function
-	   * @type {function}
-	   * @private
-	   */
-	  _scroll: window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame || function (callback) {
-	    window.setTimeout(callback, 1000 / 60);
-	  },
-	
-	  /**
-	   * Current H&V scrolls position
-	   * @type [{number}, {number}]
-	   * @private
-	   */
-	  _position: [-1, -1],
-	
-	  /**
-	   * Directives collection
-	   * @type [{Directive}]
-	   * @private
-	   */
-	  _collection: [],
-	
-	  /**
-	   * Object initialization
-	   * @private
-	   */
-	  _init: function _init() {
-	    this._run = this._run.bind(this);
-	    // this._collection = new Proxy(this._data, {
-	    //   deleteProperty: (target, property) => {
-	    //     delete target[property];
-	    //     if (target.length === 0) {
-	    //       this._stop();
-	    //     }
-	    //     return true;
-	    //   },
-	    //   set: (target, property, value, receiver) => {
-	    //     target[property] = value;
-	    //     if (target.length > 0) {
-	    //       this._start();
-	    //     }
-	    //     return true;
-	    //   }
-	    // });
-	  },
-	
-	
-	  /**
-	   * Starts to track scrolls and call directives
-	   * @private
-	   */
-	  _start: function _start() {
-	    // add event listener:
-	    switch (this.mode) {
-	      case 'scroll':
-	        window.addEventListener('scroll', this._run);
-	        break;
-	      case 'requestAnimationFrame':
-	        this._scroll.call(window, this._run);
-	        break;
-	    }
-	    // trigger scroll event to apply directives for current positions:
-	    if (document.readyState !== 'complete') {
-	      window.addEventListener('load', function () {
-	        window.scrollTo(window.scrollX, window.scrollX);
-	      });
-	    } else {
-	      window.scrollTo(window.scrollX, window.scrollX);
-	    }
-	    // set active:
-	    this.active = true;
-	  },
-	
-	
-	  /**
-	   * Stops to track scrolls and call directives
-	   * @private
-	   */
-	  _stop: function _stop() {
-	    // remove event listener:
-	    if (this.mode === 'scroll') {
-	      window.removeEventListener('scroll', this._run);
-	    }
-	    // set inactive:
-	    this.active = false;
-	  },
-	
-	
-	  /**
-	   * Starts or stops orchestrator depends on how many directives are active
-	   * @private
-	   */
-	  _update: function _update() {
-	    // stop if there are no directives or all of them are disabled:
-	    if (this._collection.length === 0 || this._collection.every(function (directive) {
-	      return !directive.enabled;
-	    })) {
-	      this.active && this._stop();
-	    } else {
-	      !this.active && this._start();
-	    }
-	  },
-	
-	
-	  /**
-	   *
-	   * @private
-	   */
-	  _run: function _run() {
-	    var _this = this;
-	
-	    // position hasn't changed (optimization):
-	    if (this._position[0] === window.pageXOffset && this._position[1] === window.pageYOffset) {
-	      // re-run:
-	      if (this.mode === 'requestAnimationFrame') {
-	        this._scroll.call(window, this._run);
-	      }
-	      return false;
-	    }
-	
-	    this._position = [window.pageXOffset, window.pageYOffset];
-	    this._collection.forEach(function (p) {
-	      return p.run(_this._position[0], _this._position[1]);
-	    });
-	
-	    // re-run:
-	    if (this.mode === 'requestAnimationFrame') {
-	      this._scroll.call(window, this._run);
-	    }
-	  },
-	
-	  /**
-	   * Adds a new directive to collection
-	   * @param {string} [id] Directive unique ID
-	   * @param {object} options Directive options
-	   * @return {string} Directive ID if valid, undefined otherwise
-	   */
-	  add: function add(id, options) {
-	    // validate arguments:
-	    if (!((typeof id === 'undefined' ? 'undefined' : _typeof(id)) === 'object' || (typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object')) {
-	      console.warn('Orchestrator: wrong number or type of arguments');
-	      return false;
-	    }
-	    // generate directive id if it's empty and move current id content to options:
-	    else if (!options) {
-	        options = id;
-	        id = null;
-	      } else {
-	        this.remove(id);
-	      }
-	
-	    // create directive
-	    var directive = new _directive2.default(id, options);
-	    // add it to collection, upte status and return its id:
-	    if (directive.valid) {
-	      this._collection.push(directive);
-	      this._update();
-	      return directive.id;
-	    }
-	  },
-	
-	
-	  /**
-	   * Removes an existing directive or many directives from collection
-	   * @param {string} ids One or more directive unique ID to delete.
-	   * Leave blank to delete all directives.
-	   */
-	  remove: function remove() {
-	    var _this2 = this;
-	
-	    for (var _len = arguments.length, ids = Array(_len), _key = 0; _key < _len; _key++) {
-	      ids[_key] = arguments[_key];
-	    }
-	
-	    // delete all & update status:
-	    if (ids.length === 0) {
-	      this._collection.length = 0;
-	      this._update();
-	      return true;
-	    }
-	
-	    // delete some by id & update status:
-	    ids.forEach(function (id) {
-	      var index = _this2._collection.findIndex(function (p) {
-	        return p.id === id;
-	      });
-	      if (index >= 0) {
-	        _this2._collection.splice(index, 1);
-	        _this2._update();
-	      }
-	    });
-	  },
-	
-	
-	  /**
-	   * Disables a directive or many directives
-	   * @param {string} [ids] One or more directive unique ID to disable.
-	   * Leave blank to disable all directives.
-	   */
-	  disable: function disable() {
-	    var _this3 = this;
-	
-	    for (var _len2 = arguments.length, ids = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-	      ids[_key2] = arguments[_key2];
-	    }
-	
-	    this._collection.filter(function (p) {
-	      return ids.includes(p.id) || ids.length === 0;
-	    }).forEach(function (p) {
-	      p.disable();
-	      _this3._update();
-	    });
-	  },
-	
-	
-	  /**
-	   * Enables a directive or many directives
-	   * @param {string} [ids] One or more directive unique ID to enable.
-	   * Leave blank to enable all directives.
-	   */
-	  enable: function enable() {
-	    var _this4 = this;
-	
-	    for (var _len3 = arguments.length, ids = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-	      ids[_key3] = arguments[_key3];
-	    }
-	
-	    this._collection.filter(function (p) {
-	      return ids.includes(p.id) || ids.length === 0;
-	    }).forEach(function (p) {
-	      p.enable();
-	      _this4._update();
-	    });
-	  }
+	/**
+	 * Scroll callback function
+	 * @type {function}
+	 */
+	var scroll = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame || function (callback) {
+	  window.setTimeout(callback, 1000 / 60);
 	};
+	/**
+	 * Current H & V scrolls position
+	 * @type {{left: number, top: number}}
+	 */
+	window.position = { left: -1, top: -1 };
+	/**
+	 * Scroll mode
+	 * @type {string}
+	 */
+	var mode = 'scroll'; // 'requestAnimationFrame'
 	
-	orchestrator._init();
+	/**
+	 * Main execution function
+	 * @type {function}
+	 */
+	function run() {
+	  // position hasn't changed (optimization):
+	  if (window.position.left === window.pageXOffset && window.position.top === window.pageYOffset) {
+	    // re-run:
+	    if (mode === 'requestAnimationFrame') {
+	      scroll(run);
+	    }
+	    return false;
+	  }
+	
+	  window.position = { left: window.pageXOffset, top: window.pageYOffset };
+	  _collection2.default.forEach(function (o) {
+	    o.run();
+	  });
+	
+	  // re-run:
+	  if (mode === 'requestAnimationFrame') {
+	    scroll(run);
+	  }
+	}
+	
+	(function init() {
+	  // add event listener:
+	  switch (mode) {
+	    case 'scroll':
+	      window.addEventListener('scroll', run);
+	      break;
+	    case 'requestAnimationFrame':
+	      scroll(run);
+	      break;
+	  }
+	
+	  // trigger scroll event to apply directives for current positions:
+	  if (document.readyState !== 'complete') {
+	    window.addEventListener('load', function () {
+	      window.scrollTo(window.scrollX, window.scrollX);
+	    });
+	  } else {
+	    window.scrollTo(window.scrollX, window.scrollX);
+	  }
+	})();
 	
 	// export default orchestrator:
-	exports.default = orchestrator;
+	exports.default = _orchestrator2.default;
 
 /***/ },
 /* 1 */
 /***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Created by nirelbaz on 30/12/2016.
+	 */
+	var collection = [];
+	
+	exports.default = collection;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -336,38 +167,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
+	var _lodash = __webpack_require__(3);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _collection = __webpack_require__(1);
+	
+	var _collection2 = _interopRequireDefault(_collection);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	var actions = ['setStyle', 'removeClass', 'addClass', 'callFunction'];
+	
 	/**
 	 * Created by nirelbaz on 21/12/2016.
 	 */
-	var Directive = function () {
-	  function Directive(id, options) {
-	    _classCallCheck(this, Directive);
 	
-	    this.id = id || btoa(new Date().valueOf().toString());
+	var Orchestrator = function () {
+	  function Orchestrator(options) {
+	    _classCallCheck(this, Orchestrator);
+	
+	    /**
+	     * Orchestrator unique ID
+	     * @type {string}
+	     */
+	    this.id = btoa(new Date().valueOf().toString());
+	    /**
+	     * Indicates whether orchestrator is enabled
+	     * @type {boolean}
+	     */
 	    this.enabled = false;
+	    /**
+	     * Indicates whether orchestrator passed validation successfully
+	     * @type {boolean}
+	     */
 	    this.valid = false;
+	    /**
+	     * DOM element(s)
+	     * @type {HTMLElement[]}
+	     */
 	    this.element = null;
-	
+	    // extract additional properties from options:
 	    this.extractOptions(options);
 	  }
 	
 	  /**
-	   * Disables directive
+	   * Disables orchestrator
 	   */
 	
 	
-	  _createClass(Directive, [{
+	  _createClass(Orchestrator, [{
 	    key: 'disable',
 	    value: function disable() {
 	      this.enabled = false;
 	    }
 	
 	    /**
-	     * Enables directive
+	     * Enables orchestrator
 	     */
 	
 	  }, {
@@ -378,7 +238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Extracts & validates options
-	     * @param {object} options Directive options
+	     * @param {object} options Orchestrator options
 	     */
 	
 	  }, {
@@ -387,86 +247,81 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this = this;
 	
 	      // check for common options:
-	      if (options.selector && options.timeline && _typeof(options.timeline) === 'object') {
+	      if (options.selector && (options.top && (Number.isInteger(options.top) || _typeof(options.top) === 'object' && options.top.from && Number.isInteger(options.top.from)) || options.left && (Number.isInteger(options.left) || _typeof(options.left) === 'object' && options.left.from && Number.isInteger(options.left.from))) && (options.setStyle || options.addClass || options.removeClass || options.callFunction)) {
 	        this.selector = options.selector;
 	        this.element = document.querySelectorAll(options.selector);
-	        this.timeline = options.timeline;
 	        this.style = [];
+	        this.actions = {};
+	        this.left = {
+	          from: options.left && Number.isInteger(options.left) ? options.left : options.left ? options.left.from : null,
+	          to: options.left && options.left.to || null
+	        };
+	        this.top = {
+	          from: options.top && Number.isInteger(options.top) ? options.top : options.top ? options.top.from : null,
+	          to: options.top && options.top.to || null
+	        };
+	        if (options.debounce) {
+	          this.run = _lodash2.default.debounce(this._run, Number.isInteger(options.debounce) ? options.debounce : 100);
+	        } else if (options.throttle) {
+	          this.run = _lodash2.default.throttle(this._run, Number.isInteger(options.throttle) ? options.throttle : 100);
+	        } else {
+	          this.run = this._run;
+	        }
 	
-	        // validate and format timeline array:
-	        this.timeline.forEach(function (scene) {
-	          if (scene.actions && _typeof(scene.actions) === 'object' && (scene.top && (isFinite(scene.top) || Array.isArray(scene.top) && scene.top.every(function (n) {
-	            return isFinite(n);
-	          })) || scene.left && (isFinite(scene.left) || Array.isArray(scene.left) && scene.left.every(function (n) {
-	            return isFinite(n);
-	          })))) {
-	            scene.top = Array.isArray(scene.top) ? scene.top : [scene.top, null];
-	            scene.left = Array.isArray(scene.left) ? scene.left : [scene.left, null];
-	
-	            // now check actions object:
-	            for (var action in scene.actions) {
-	              if (scene.actions.hasOwnProperty(action)) {
-	                switch (action) {
-	                  case 'addClass':
-	                    if (typeof scene.actions[action] === 'string' || Array.isArray(scene.actions[action])) {
-	                      if (typeof scene.actions[action] === 'string') {
-	                        scene.actions.addClass = [scene.actions[action]];
-	                      }
-	                    } else {
-	                      delete scene.actions[action];
-	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
-	                    }
-	                    break;
-	                  case 'removeClass':
-	                    if (typeof scene.actions[action] === 'string' || Array.isArray(scene.actions[action])) {
-	                      if (typeof scene.actions[action] === 'string') {
-	                        scene.actions.removeClass = [scene.actions[action]];
-	                      }
-	                    } else {
-	                      delete scene.actions[action];
-	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
-	                    }
-	                    break;
-	                  case 'setStyle':
-	                    if (_typeof(scene.actions[action]) !== 'object' || Object.keys(scene.actions[action]).length === 0) {
-	                      delete scene.actions[action];
-	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
-	                    }
-	
-	                    // store current style:
-	                    _this.getCurrentStyle(scene);
-	                    break;
-	                  case 'callFunction':
-	                    if (typeof scene.method !== 'function') {
-	                      delete scene.actions[action];
-	                      console.warn('Action ' + action + ' of directive ' + _this.id + ' is not valid');
-	                    }
-	                    break;
+	        // now check actions object:
+	        actions.forEach(function (action) {
+	          if (options.hasOwnProperty(action)) {
+	            switch (action) {
+	              case 'removeClass':
+	              case 'addClass':
+	                if (typeof options[action] === 'string' || Array.isArray(options[action])) {
+	                  if (typeof options[action] === 'string') {
+	                    _this.actions[action] = [options[action]];
+	                  }
+	                } else {
+	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
 	                }
-	              }
-	
-	              if (Object.keys(scene.actions).length > 0) {
-	                _this.enabled = true;
-	                _this.valid = true;
-	              } else {
-	                console.warn('Directive ' + _this.id + ' has no valid actions');
-	              }
+	                break;
+	              case 'setStyle':
+	                if (_typeof(options[action]) === 'object' && Object.keys(options[action]).length > 0) {
+	                  _this.actions[action] = options[action];
+	                  // store current style:
+	                  _this.getCurrentStyle();
+	                } else {
+	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
+	                }
+	                break;
+	              case 'callFunction':
+	                if (typeof options[action] === 'function') {
+	                  _this.actions[action] = options[action];
+	                } else {
+	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
+	                }
+	                break;
 	            }
 	          }
 	        });
+	
+	        // validate that there is at least one action:
+	        if (Object.keys(this.actions).length > 0) {
+	          _collection2.default.push(this);
+	          this.enabled = true;
+	          this.valid = true;
+	        } else {
+	          console.warn('Orchestrator ' + this.id + ' has no valid actions');
+	        }
 	      } else {
-	        console.warn('Directive ' + this.id + ' is not valid');
+	        console.warn('Orchestrator ' + this.id + ' is not valid');
 	      }
 	    }
 	
 	    /**
 	     * Stores element's current style for reset when scroll not in range
-	     * @param {object} scene Timeline scene
 	     */
 	
 	  }, {
 	    key: 'getCurrentStyle',
-	    value: function getCurrentStyle(scene) {
+	    value: function getCurrentStyle() {
 	      var _this2 = this;
 	
 	      if (this.element && this.element.length > 0) {
@@ -474,7 +329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var style = window.getComputedStyle(element),
 	              current = _this2.style && _this2.style.length > index && _this2.style[index] || {};
 	
-	          Object.keys(scene.actions.setStyle).forEach(function (prop) {
+	          Object.keys(_this2.actions.setStyle).forEach(function (prop) {
 	            current[prop] = style.getPropertyValue(prop);
 	          });
 	          _this2.style.push(current);
@@ -482,116 +337,865 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }, {
-	    key: 'run',
-	    value: function run(left, top) {
-	      var _this3 = this;
+	    key: '_run',
+	    value: function _run() {
+	      var position = window.position;
 	
-	      var shouldGetStyle = false;
-	
-	      // continue only if directive is enabled & valid:
+	      // continue only if orchestrator is enabled & valid:
 	      if (this.enabled && this.valid) {
 	        // if element is empty, find and cache it:
 	        if (!this.element || this.element.length === 0) {
 	          this.element = document.querySelectorAll(this.selector);
-	          shouldGetStyle = true;
+	          this.getCurrentStyle();
 	        }
 	        // verify there's such element:
 	        if (this.element && this.element.length > 0) {
-	          this.timeline.forEach(function (scene) {
-	            if (shouldGetStyle) {
-	              // store current style:
-	              _this3.getCurrentStyle(scene);
+	          // orchestrator is in range:
+	          if (this.top.from && position.top >= this.top.from && (position.top <= this.top.to || !this.top.to) || this.left.from && position.left >= this.left.from && (position.left <= this.left.to || !this.left.to)) {
+	            this._apply();
+	          }
+	          // orchestrator is out of range:
+	          else {
+	              this._cease();
 	            }
-	            // directive is in range:
-	            if (top >= scene.top[0] && (top <= scene.top[1] || !scene.top[1]) || left >= scene.left[0] && (left <= scene.left[1] || !scene.left[1])) {
-	              var _loop = function _loop(action) {
-	                if (scene.actions.hasOwnProperty(action)) {
-	                  switch (action) {
-	                    case 'addClass':
-	                    case 'removeClass':
-	                      [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
-	                        scene.actions[action].forEach(function (className) {
-	                          if (action === 'addClass') {
-	                            element.classList.add(className);
-	                          } else {
-	                            element.classList.remove(className);
-	                          }
-	                        });
-	                      });
-	                      break;
-	                    case 'setStyle':
-	                      var _loop2 = function _loop2(property) {
-	                        if (scene.actions[action].hasOwnProperty(property)) {
-	                          [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
-	                            element.style[property] = typeof scene.actions[action][property] === 'function' ? scene.actions[action][property](left, top) : scene.actions[action][property];
-	                          });
-	                        }
-	                      };
+	        }
+	      }
+	    }
 	
-	                      for (var property in scene.actions[action]) {
-	                        _loop2(property);
-	                      }
-	                      break;
-	                    case 'callFunction':
-	                      scene.actions[action](left, top);
-	                      break;
+	    /**
+	     * Applies all actions when scroll is in range
+	     * @private
+	     */
+	
+	  }, {
+	    key: '_apply',
+	    value: function _apply() {
+	      var _this3 = this;
+	
+	      var _loop = function _loop(action) {
+	        if (_this3.actions.hasOwnProperty(action)) {
+	          switch (action) {
+	            case 'addClass':
+	            case 'removeClass':
+	              [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
+	                _this3.actions[action].forEach(function (className) {
+	                  if (action === 'addClass') {
+	                    element.classList.add(className);
+	                  } else {
+	                    element.classList.remove(className);
 	                  }
+	                });
+	              });
+	              break;
+	            case 'setStyle':
+	              var _loop2 = function _loop2(property) {
+	                if (_this3.actions[action].hasOwnProperty(property)) {
+	                  [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
+	                    element.style[property] = typeof _this3.actions[action][property] === 'function' ? _this3.actions[action][property](position.left, position.top) : _this3.actions[action][property];
+	                  });
 	                }
 	              };
 	
-	              for (var action in scene.actions) {
-	                _loop(action);
+	              for (var property in _this3.actions[action]) {
+	                _loop2(property);
 	              }
-	            }
-	            // directive is out of range:
-	            else {
-	                var _loop3 = function _loop3(action) {
-	                  if (scene.actions.hasOwnProperty(action)) {
-	                    switch (action) {
-	                      case 'addClass':
-	                      case 'removeClass':
-	                        [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
-	                          scene.actions[action].forEach(function (className) {
-	                            if (action === 'addClass') {
-	                              element.classList.remove(className);
-	                            } else {
-	                              element.classList.add(className);
-	                            }
-	                          });
-	                        });
-	                        break;
-	                      case 'setStyle':
-	                        var _loop4 = function _loop4(property) {
-	                          if (scene.actions[action].hasOwnProperty(property)) {
-	                            [].concat(_toConsumableArray(_this3.element)).forEach(function (element, index) {
-	                              element.style[property] = _this3.style[index][property];
-	                            });
-	                          }
-	                        };
-	
-	                        for (var property in scene.actions[action]) {
-	                          _loop4(property);
-	                        }
-	                        break;
-	                    }
-	                  }
-	                };
-	
-	                for (var action in scene.actions) {
-	                  _loop3(action);
-	                }
-	              }
-	          });
-	          shouldGetStyle = false;
+	              break;
+	            case 'callFunction':
+	              _this3.actions[action](position.left, position.top);
+	              break;
+	          }
 	        }
+	      };
+	
+	      for (var action in this.actions) {
+	        _loop(action);
+	      }
+	    }
+	
+	    /**
+	     * Ceases some actions (setStyle, addClass & removeClass) when scroll is out of range
+	     * @private
+	     */
+	
+	  }, {
+	    key: '_cease',
+	    value: function _cease() {
+	      var _this4 = this;
+	
+	      var _loop3 = function _loop3(action) {
+	        if (_this4.actions.hasOwnProperty(action)) {
+	          switch (action) {
+	            case 'addClass':
+	            case 'removeClass':
+	              [].concat(_toConsumableArray(_this4.element)).forEach(function (element) {
+	                _this4.actions[action].forEach(function (className) {
+	                  if (action === 'addClass') {
+	                    element.classList.remove(className);
+	                  } else {
+	                    element.classList.add(className);
+	                  }
+	                });
+	              });
+	              break;
+	            case 'setStyle':
+	              var _loop4 = function _loop4(property) {
+	                if (_this4.actions[action].hasOwnProperty(property)) {
+	                  [].concat(_toConsumableArray(_this4.element)).forEach(function (element, index) {
+	                    element.style[property] = _this4.style[index][property];
+	                  });
+	                }
+	              };
+	
+	              for (var property in _this4.actions[action]) {
+	                _loop4(property);
+	              }
+	              break;
+	          }
+	        }
+	      };
+	
+	      for (var action in this.actions) {
+	        _loop3(action);
 	      }
 	    }
 	  }]);
 	
-	  return Directive;
+	  return Orchestrator;
 	}();
 	
-	exports.default = Directive;
+	exports.default = Orchestrator;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {'use strict';
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	/**
+	 * @license
+	 * Lodash (Custom Build) <https://lodash.com/>
+	 * Build: `lodash include="throttle,debounce"`
+	 * Copyright JS Foundation and other contributors <https://js.foundation/>
+	 * Released under MIT license <https://lodash.com/license>
+	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+	 * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 */
+	;(function () {
+	
+	  /** Used as a safe reference for `undefined` in pre-ES5 environments. */
+	  var undefined;
+	
+	  /** Used as the semantic version number. */
+	  var VERSION = '4.17.3';
+	
+	  /** Error message constants. */
+	  var FUNC_ERROR_TEXT = 'Expected a function';
+	
+	  /** Used as references for various `Number` constants. */
+	  var NAN = 0 / 0;
+	
+	  /** `Object#toString` result references. */
+	  var nullTag = '[object Null]',
+	      symbolTag = '[object Symbol]',
+	      undefinedTag = '[object Undefined]';
+	
+	  /** Used to match leading and trailing whitespace. */
+	  var reTrim = /^\s+|\s+$/g;
+	
+	  /** Used to detect bad signed hexadecimal string values. */
+	  var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+	
+	  /** Used to detect binary string values. */
+	  var reIsBinary = /^0b[01]+$/i;
+	
+	  /** Used to detect octal string values. */
+	  var reIsOctal = /^0o[0-7]+$/i;
+	
+	  /** Built-in method references without a dependency on `root`. */
+	  var freeParseInt = parseInt;
+	
+	  /** Detect free variable `global` from Node.js. */
+	  var freeGlobal = (typeof global === 'undefined' ? 'undefined' : _typeof(global)) == 'object' && global && global.Object === Object && global;
+	
+	  /** Detect free variable `self`. */
+	  var freeSelf = (typeof self === 'undefined' ? 'undefined' : _typeof(self)) == 'object' && self && self.Object === Object && self;
+	
+	  /** Used as a reference to the global object. */
+	  var root = freeGlobal || freeSelf || Function('return this')();
+	
+	  /** Detect free variable `exports`. */
+	  var freeExports = ( false ? 'undefined' : _typeof(exports)) == 'object' && exports && !exports.nodeType && exports;
+	
+	  /** Detect free variable `module`. */
+	  var freeModule = freeExports && ( false ? 'undefined' : _typeof(module)) == 'object' && module && !module.nodeType && module;
+	
+	  /*--------------------------------------------------------------------------*/
+	
+	  /** Used for built-in method references. */
+	  var objectProto = Object.prototype;
+	
+	  /** Used to check objects for own properties. */
+	  var hasOwnProperty = objectProto.hasOwnProperty;
+	
+	  /**
+	   * Used to resolve the
+	   * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+	   * of values.
+	   */
+	  var nativeObjectToString = objectProto.toString;
+	
+	  /** Built-in value references. */
+	  var _Symbol = root.Symbol,
+	      symToStringTag = _Symbol ? _Symbol.toStringTag : undefined;
+	
+	  /* Built-in method references for those with the same name as other `lodash` methods. */
+	  var nativeMax = Math.max,
+	      nativeMin = Math.min;
+	
+	  /** Used to lookup unminified function names. */
+	  var realNames = {};
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * Creates a `lodash` object which wraps `value` to enable implicit method
+	   * chain sequences. Methods that operate on and return arrays, collections,
+	   * and functions can be chained together. Methods that retrieve a single value
+	   * or may return a primitive value will automatically end the chain sequence
+	   * and return the unwrapped value. Otherwise, the value must be unwrapped
+	   * with `_#value`.
+	   *
+	   * Explicit chain sequences, which must be unwrapped with `_#value`, may be
+	   * enabled using `_.chain`.
+	   *
+	   * The execution of chained methods is lazy, that is, it's deferred until
+	   * `_#value` is implicitly or explicitly called.
+	   *
+	   * Lazy evaluation allows several methods to support shortcut fusion.
+	   * Shortcut fusion is an optimization to merge iteratee calls; this avoids
+	   * the creation of intermediate arrays and can greatly reduce the number of
+	   * iteratee executions. Sections of a chain sequence qualify for shortcut
+	   * fusion if the section is applied to an array and iteratees accept only
+	   * one argument. The heuristic for whether a section qualifies for shortcut
+	   * fusion is subject to change.
+	   *
+	   * Chaining is supported in custom builds as long as the `_#value` method is
+	   * directly or indirectly included in the build.
+	   *
+	   * In addition to lodash methods, wrappers have `Array` and `String` methods.
+	   *
+	   * The wrapper `Array` methods are:
+	   * `concat`, `join`, `pop`, `push`, `shift`, `sort`, `splice`, and `unshift`
+	   *
+	   * The wrapper `String` methods are:
+	   * `replace` and `split`
+	   *
+	   * The wrapper methods that support shortcut fusion are:
+	   * `at`, `compact`, `drop`, `dropRight`, `dropWhile`, `filter`, `find`,
+	   * `findLast`, `head`, `initial`, `last`, `map`, `reject`, `reverse`, `slice`,
+	   * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `toArray`
+	   *
+	   * The chainable wrapper methods are:
+	   * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`, `at`,
+	   * `before`, `bind`, `bindAll`, `bindKey`, `castArray`, `chain`, `chunk`,
+	   * `commit`, `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`,
+	   * `curry`, `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`,
+	   * `difference`, `differenceBy`, `differenceWith`, `drop`, `dropRight`,
+	   * `dropRightWhile`, `dropWhile`, `extend`, `extendWith`, `fill`, `filter`,
+	   * `flatMap`, `flatMapDeep`, `flatMapDepth`, `flatten`, `flattenDeep`,
+	   * `flattenDepth`, `flip`, `flow`, `flowRight`, `fromPairs`, `functions`,
+	   * `functionsIn`, `groupBy`, `initial`, `intersection`, `intersectionBy`,
+	   * `intersectionWith`, `invert`, `invertBy`, `invokeMap`, `iteratee`, `keyBy`,
+	   * `keys`, `keysIn`, `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`,
+	   * `memoize`, `merge`, `mergeWith`, `method`, `methodOf`, `mixin`, `negate`,
+	   * `nthArg`, `omit`, `omitBy`, `once`, `orderBy`, `over`, `overArgs`,
+	   * `overEvery`, `overSome`, `partial`, `partialRight`, `partition`, `pick`,
+	   * `pickBy`, `plant`, `property`, `propertyOf`, `pull`, `pullAll`, `pullAllBy`,
+	   * `pullAllWith`, `pullAt`, `push`, `range`, `rangeRight`, `rearg`, `reject`,
+	   * `remove`, `rest`, `reverse`, `sampleSize`, `set`, `setWith`, `shuffle`,
+	   * `slice`, `sort`, `sortBy`, `splice`, `spread`, `tail`, `take`, `takeRight`,
+	   * `takeRightWhile`, `takeWhile`, `tap`, `throttle`, `thru`, `toArray`,
+	   * `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`, `transform`, `unary`,
+	   * `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`, `uniqWith`, `unset`,
+	   * `unshift`, `unzip`, `unzipWith`, `update`, `updateWith`, `values`,
+	   * `valuesIn`, `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`,
+	   * `zipObject`, `zipObjectDeep`, and `zipWith`
+	   *
+	   * The wrapper methods that are **not** chainable by default are:
+	   * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
+	   * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `conformsTo`, `deburr`,
+	   * `defaultTo`, `divide`, `each`, `eachRight`, `endsWith`, `eq`, `escape`,
+	   * `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`, `findLast`,
+	   * `findLastIndex`, `findLastKey`, `first`, `floor`, `forEach`, `forEachRight`,
+	   * `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,
+	   * `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,
+	   * `isArguments`, `isArray`, `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`,
+	   * `isBoolean`, `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`,
+	   * `isEqualWith`, `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`,
+	   * `isMap`, `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,
+	   * `isNumber`, `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`,
+	   * `isSafeInteger`, `isSet`, `isString`, `isUndefined`, `isTypedArray`,
+	   * `isWeakMap`, `isWeakSet`, `join`, `kebabCase`, `last`, `lastIndexOf`,
+	   * `lowerCase`, `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`,
+	   * `min`, `minBy`, `multiply`, `noConflict`, `noop`, `now`, `nth`, `pad`,
+	   * `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`, `reduceRight`,
+	   * `repeat`, `result`, `round`, `runInContext`, `sample`, `shift`, `size`,
+	   * `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`, `sortedLastIndex`,
+	   * `sortedLastIndexBy`, `startCase`, `startsWith`, `stubArray`, `stubFalse`,
+	   * `stubObject`, `stubString`, `stubTrue`, `subtract`, `sum`, `sumBy`,
+	   * `template`, `times`, `toFinite`, `toInteger`, `toJSON`, `toLength`,
+	   * `toLower`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`,
+	   * `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`,
+	   * `upperFirst`, `value`, and `words`
+	   *
+	   * @name _
+	   * @constructor
+	   * @category Seq
+	   * @param {*} value The value to wrap in a `lodash` instance.
+	   * @returns {Object} Returns the new `lodash` wrapper instance.
+	   * @example
+	   *
+	   * function square(n) {
+	   *   return n * n;
+	   * }
+	   *
+	   * var wrapped = _([1, 2, 3]);
+	   *
+	   * // Returns an unwrapped value.
+	   * wrapped.reduce(_.add);
+	   * // => 6
+	   *
+	   * // Returns a wrapped value.
+	   * var squares = wrapped.map(square);
+	   *
+	   * _.isArray(squares);
+	   * // => false
+	   *
+	   * _.isArray(squares.value());
+	   * // => true
+	   */
+	  function lodash() {}
+	  // No operation performed.
+	
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * The base implementation of `getTag` without fallbacks for buggy environments.
+	   *
+	   * @private
+	   * @param {*} value The value to query.
+	   * @returns {string} Returns the `toStringTag`.
+	   */
+	  function baseGetTag(value) {
+	    if (value == null) {
+	      return value === undefined ? undefinedTag : nullTag;
+	    }
+	    return symToStringTag && symToStringTag in Object(value) ? getRawTag(value) : objectToString(value);
+	  }
+	
+	  /**
+	   * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+	   *
+	   * @private
+	   * @param {*} value The value to query.
+	   * @returns {string} Returns the raw `toStringTag`.
+	   */
+	  function getRawTag(value) {
+	    var isOwn = hasOwnProperty.call(value, symToStringTag),
+	        tag = value[symToStringTag];
+	
+	    try {
+	      value[symToStringTag] = undefined;
+	      var unmasked = true;
+	    } catch (e) {}
+	
+	    var result = nativeObjectToString.call(value);
+	    if (unmasked) {
+	      if (isOwn) {
+	        value[symToStringTag] = tag;
+	      } else {
+	        delete value[symToStringTag];
+	      }
+	    }
+	    return result;
+	  }
+	
+	  /**
+	   * Converts `value` to a string using `Object.prototype.toString`.
+	   *
+	   * @private
+	   * @param {*} value The value to convert.
+	   * @returns {string} Returns the converted string.
+	   */
+	  function objectToString(value) {
+	    return nativeObjectToString.call(value);
+	  }
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * Gets the timestamp of the number of milliseconds that have elapsed since
+	   * the Unix epoch (1 January 1970 00:00:00 UTC).
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 2.4.0
+	   * @category Date
+	   * @returns {number} Returns the timestamp.
+	   * @example
+	   *
+	   * _.defer(function(stamp) {
+	   *   console.log(_.now() - stamp);
+	   * }, _.now());
+	   * // => Logs the number of milliseconds it took for the deferred invocation.
+	   */
+	  var now = function now() {
+	    return root.Date.now();
+	  };
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * Creates a debounced function that delays invoking `func` until after `wait`
+	   * milliseconds have elapsed since the last time the debounced function was
+	   * invoked. The debounced function comes with a `cancel` method to cancel
+	   * delayed `func` invocations and a `flush` method to immediately invoke them.
+	   * Provide `options` to indicate whether `func` should be invoked on the
+	   * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+	   * with the last arguments provided to the debounced function. Subsequent
+	   * calls to the debounced function return the result of the last `func`
+	   * invocation.
+	   *
+	   * **Note:** If `leading` and `trailing` options are `true`, `func` is
+	   * invoked on the trailing edge of the timeout only if the debounced function
+	   * is invoked more than once during the `wait` timeout.
+	   *
+	   * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+	   * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+	   *
+	   * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+	   * for details over the differences between `_.debounce` and `_.throttle`.
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 0.1.0
+	   * @category Function
+	   * @param {Function} func The function to debounce.
+	   * @param {number} [wait=0] The number of milliseconds to delay.
+	   * @param {Object} [options={}] The options object.
+	   * @param {boolean} [options.leading=false]
+	   *  Specify invoking on the leading edge of the timeout.
+	   * @param {number} [options.maxWait]
+	   *  The maximum time `func` is allowed to be delayed before it's invoked.
+	   * @param {boolean} [options.trailing=true]
+	   *  Specify invoking on the trailing edge of the timeout.
+	   * @returns {Function} Returns the new debounced function.
+	   * @example
+	   *
+	   * // Avoid costly calculations while the window size is in flux.
+	   * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+	   *
+	   * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+	   * jQuery(element).on('click', _.debounce(sendMail, 300, {
+	   *   'leading': true,
+	   *   'trailing': false
+	   * }));
+	   *
+	   * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+	   * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+	   * var source = new EventSource('/stream');
+	   * jQuery(source).on('message', debounced);
+	   *
+	   * // Cancel the trailing debounced invocation.
+	   * jQuery(window).on('popstate', debounced.cancel);
+	   */
+	  function debounce(func, wait, options) {
+	    var lastArgs,
+	        lastThis,
+	        maxWait,
+	        result,
+	        timerId,
+	        lastCallTime,
+	        lastInvokeTime = 0,
+	        leading = false,
+	        maxing = false,
+	        trailing = true;
+	
+	    if (typeof func != 'function') {
+	      throw new TypeError(FUNC_ERROR_TEXT);
+	    }
+	    wait = toNumber(wait) || 0;
+	    if (isObject(options)) {
+	      leading = !!options.leading;
+	      maxing = 'maxWait' in options;
+	      maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+	      trailing = 'trailing' in options ? !!options.trailing : trailing;
+	    }
+	
+	    function invokeFunc(time) {
+	      var args = lastArgs,
+	          thisArg = lastThis;
+	
+	      lastArgs = lastThis = undefined;
+	      lastInvokeTime = time;
+	      result = func.apply(thisArg, args);
+	      return result;
+	    }
+	
+	    function leadingEdge(time) {
+	      // Reset any `maxWait` timer.
+	      lastInvokeTime = time;
+	      // Start the timer for the trailing edge.
+	      timerId = setTimeout(timerExpired, wait);
+	      // Invoke the leading edge.
+	      return leading ? invokeFunc(time) : result;
+	    }
+	
+	    function remainingWait(time) {
+	      var timeSinceLastCall = time - lastCallTime,
+	          timeSinceLastInvoke = time - lastInvokeTime,
+	          result = wait - timeSinceLastCall;
+	
+	      return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+	    }
+	
+	    function shouldInvoke(time) {
+	      var timeSinceLastCall = time - lastCallTime,
+	          timeSinceLastInvoke = time - lastInvokeTime;
+	
+	      // Either this is the first call, activity has stopped and we're at the
+	      // trailing edge, the system time has gone backwards and we're treating
+	      // it as the trailing edge, or we've hit the `maxWait` limit.
+	      return lastCallTime === undefined || timeSinceLastCall >= wait || timeSinceLastCall < 0 || maxing && timeSinceLastInvoke >= maxWait;
+	    }
+	
+	    function timerExpired() {
+	      var time = now();
+	      if (shouldInvoke(time)) {
+	        return trailingEdge(time);
+	      }
+	      // Restart the timer.
+	      timerId = setTimeout(timerExpired, remainingWait(time));
+	    }
+	
+	    function trailingEdge(time) {
+	      timerId = undefined;
+	
+	      // Only invoke if we have `lastArgs` which means `func` has been
+	      // debounced at least once.
+	      if (trailing && lastArgs) {
+	        return invokeFunc(time);
+	      }
+	      lastArgs = lastThis = undefined;
+	      return result;
+	    }
+	
+	    function cancel() {
+	      if (timerId !== undefined) {
+	        clearTimeout(timerId);
+	      }
+	      lastInvokeTime = 0;
+	      lastArgs = lastCallTime = lastThis = timerId = undefined;
+	    }
+	
+	    function flush() {
+	      return timerId === undefined ? result : trailingEdge(now());
+	    }
+	
+	    function debounced() {
+	      var time = now(),
+	          isInvoking = shouldInvoke(time);
+	
+	      lastArgs = arguments;
+	      lastThis = this;
+	      lastCallTime = time;
+	
+	      if (isInvoking) {
+	        if (timerId === undefined) {
+	          return leadingEdge(lastCallTime);
+	        }
+	        if (maxing) {
+	          // Handle invocations in a tight loop.
+	          timerId = setTimeout(timerExpired, wait);
+	          return invokeFunc(lastCallTime);
+	        }
+	      }
+	      if (timerId === undefined) {
+	        timerId = setTimeout(timerExpired, wait);
+	      }
+	      return result;
+	    }
+	    debounced.cancel = cancel;
+	    debounced.flush = flush;
+	    return debounced;
+	  }
+	
+	  /**
+	   * Creates a throttled function that only invokes `func` at most once per
+	   * every `wait` milliseconds. The throttled function comes with a `cancel`
+	   * method to cancel delayed `func` invocations and a `flush` method to
+	   * immediately invoke them. Provide `options` to indicate whether `func`
+	   * should be invoked on the leading and/or trailing edge of the `wait`
+	   * timeout. The `func` is invoked with the last arguments provided to the
+	   * throttled function. Subsequent calls to the throttled function return the
+	   * result of the last `func` invocation.
+	   *
+	   * **Note:** If `leading` and `trailing` options are `true`, `func` is
+	   * invoked on the trailing edge of the timeout only if the throttled function
+	   * is invoked more than once during the `wait` timeout.
+	   *
+	   * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+	   * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+	   *
+	   * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+	   * for details over the differences between `_.throttle` and `_.debounce`.
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 0.1.0
+	   * @category Function
+	   * @param {Function} func The function to throttle.
+	   * @param {number} [wait=0] The number of milliseconds to throttle invocations to.
+	   * @param {Object} [options={}] The options object.
+	   * @param {boolean} [options.leading=true]
+	   *  Specify invoking on the leading edge of the timeout.
+	   * @param {boolean} [options.trailing=true]
+	   *  Specify invoking on the trailing edge of the timeout.
+	   * @returns {Function} Returns the new throttled function.
+	   * @example
+	   *
+	   * // Avoid excessively updating the position while scrolling.
+	   * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
+	   *
+	   * // Invoke `renewToken` when the click event is fired, but not more than once every 5 minutes.
+	   * var throttled = _.throttle(renewToken, 300000, { 'trailing': false });
+	   * jQuery(element).on('click', throttled);
+	   *
+	   * // Cancel the trailing throttled invocation.
+	   * jQuery(window).on('popstate', throttled.cancel);
+	   */
+	  function throttle(func, wait, options) {
+	    var leading = true,
+	        trailing = true;
+	
+	    if (typeof func != 'function') {
+	      throw new TypeError(FUNC_ERROR_TEXT);
+	    }
+	    if (isObject(options)) {
+	      leading = 'leading' in options ? !!options.leading : leading;
+	      trailing = 'trailing' in options ? !!options.trailing : trailing;
+	    }
+	    return debounce(func, wait, {
+	      'leading': leading,
+	      'maxWait': wait,
+	      'trailing': trailing
+	    });
+	  }
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * Checks if `value` is the
+	   * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+	   * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 0.1.0
+	   * @category Lang
+	   * @param {*} value The value to check.
+	   * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+	   * @example
+	   *
+	   * _.isObject({});
+	   * // => true
+	   *
+	   * _.isObject([1, 2, 3]);
+	   * // => true
+	   *
+	   * _.isObject(_.noop);
+	   * // => true
+	   *
+	   * _.isObject(null);
+	   * // => false
+	   */
+	  function isObject(value) {
+	    var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+	    return value != null && (type == 'object' || type == 'function');
+	  }
+	
+	  /**
+	   * Checks if `value` is object-like. A value is object-like if it's not `null`
+	   * and has a `typeof` result of "object".
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 4.0.0
+	   * @category Lang
+	   * @param {*} value The value to check.
+	   * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	   * @example
+	   *
+	   * _.isObjectLike({});
+	   * // => true
+	   *
+	   * _.isObjectLike([1, 2, 3]);
+	   * // => true
+	   *
+	   * _.isObjectLike(_.noop);
+	   * // => false
+	   *
+	   * _.isObjectLike(null);
+	   * // => false
+	   */
+	  function isObjectLike(value) {
+	    return value != null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == 'object';
+	  }
+	
+	  /**
+	   * Checks if `value` is classified as a `Symbol` primitive or object.
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 4.0.0
+	   * @category Lang
+	   * @param {*} value The value to check.
+	   * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+	   * @example
+	   *
+	   * _.isSymbol(Symbol.iterator);
+	   * // => true
+	   *
+	   * _.isSymbol('abc');
+	   * // => false
+	   */
+	  function isSymbol(value) {
+	    return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == 'symbol' || isObjectLike(value) && baseGetTag(value) == symbolTag;
+	  }
+	
+	  /**
+	   * Converts `value` to a number.
+	   *
+	   * @static
+	   * @memberOf _
+	   * @since 4.0.0
+	   * @category Lang
+	   * @param {*} value The value to process.
+	   * @returns {number} Returns the number.
+	   * @example
+	   *
+	   * _.toNumber(3.2);
+	   * // => 3.2
+	   *
+	   * _.toNumber(Number.MIN_VALUE);
+	   * // => 5e-324
+	   *
+	   * _.toNumber(Infinity);
+	   * // => Infinity
+	   *
+	   * _.toNumber('3.2');
+	   * // => 3.2
+	   */
+	  function toNumber(value) {
+	    if (typeof value == 'number') {
+	      return value;
+	    }
+	    if (isSymbol(value)) {
+	      return NAN;
+	    }
+	    if (isObject(value)) {
+	      var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+	      value = isObject(other) ? other + '' : other;
+	    }
+	    if (typeof value != 'string') {
+	      return value === 0 ? value : +value;
+	    }
+	    value = value.replace(reTrim, '');
+	    var isBinary = reIsBinary.test(value);
+	    return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
+	  }
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  // Add methods that return wrapped values in chain sequences.
+	  lodash.debounce = debounce;
+	  lodash.throttle = throttle;
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  // Add methods that return unwrapped values in chain sequences.
+	  lodash.isObject = isObject;
+	  lodash.isObjectLike = isObjectLike;
+	  lodash.isSymbol = isSymbol;
+	  lodash.now = now;
+	  lodash.toNumber = toNumber;
+	
+	  /*------------------------------------------------------------------------*/
+	
+	  /**
+	   * The semantic version number.
+	   *
+	   * @static
+	   * @memberOf _
+	   * @type {string}
+	   */
+	  lodash.VERSION = VERSION;
+	
+	  /*--------------------------------------------------------------------------*/
+	
+	  // Some AMD build optimizers, like r.js, check for condition patterns like:
+	  if ("function" == 'function' && _typeof(__webpack_require__(5)) == 'object' && __webpack_require__(5)) {
+	    // Expose Lodash on the global object to prevent errors when Lodash is
+	    // loaded by a script tag in the presence of an AMD loader.
+	    // See http://requirejs.org/docs/errors.html#mismatch for more details.
+	    // Use `_.noConflict` to remove Lodash from the global object.
+	    root._ = lodash;
+	
+	    // Define as an anonymous module so, through path mapping, it can be
+	    // referenced as the "underscore" module.
+	    !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	      return lodash;
+	    }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  }
+	  // Check for `exports` after `define` in case a build optimizer adds it.
+	  else if (freeModule) {
+	      // Export for Node.js.
+	      (freeModule.exports = lodash)._ = lodash;
+	      // Export for CommonJS support.
+	      freeExports._ = lodash;
+	    } else {
+	      // Export to the global object.
+	      root._ = lodash;
+	    }
+	}).call(undefined);
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(4)(module)))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }
 /******/ ])

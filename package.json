@@ -51,7 +51,7 @@
     "webpack-stream": "3.2.0"
   },
   "babelBoilerplateOptions": {
-    "entryFileName": "orchestrator.js",
-    "mainVarName": "orchestrator"
+    "entryFileName": "main.js",
+    "mainVarName": "Orchestrator"
   }
 }

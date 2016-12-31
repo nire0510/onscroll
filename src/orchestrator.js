@@ -1,228 +1,252 @@
-import Directive from './directive';
+import _ from '../vendor/lodash.custom';
+import collection from './collection';
 
-const orchestrator = {
-  /**
-   * Current
-   */
-  mode: 'scroll', // 'requestAnimationFrame' / 'scroll'
+const actions = ['setStyle', 'removeClass', 'addClass', 'callFunction'];
 
-  /**
-   * Indicates if orchestrator is currently active
-   * @type {boolean}
-   */
-  active: false,
-
-  /**
-   * Scroll callback function
-   * @type {function}
-   * @private
-   */
-  _scroll: window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    function (callback) { window.setTimeout(callback, 1000/60) },
-
-  /**
-   * Current H&V scrolls position
-   * @type [{number}, {number}]
-   * @private
-   */
-  _position: [-1, -1],
-
-  /**
-   * Directives collection
-   * @type [{Directive}]
-   * @private
-   */
-  _collection: [],
-
-  /**
-   * Object initialization
-   * @private
-   */
-  _init() {
-    this._run = this._run.bind(this);
-    // this._collection = new Proxy(this._data, {
-    //   deleteProperty: (target, property) => {
-    //     delete target[property];
-    //     if (target.length === 0) {
-    //       this._stop();
-    //     }
-    //     return true;
-    //   },
-    //   set: (target, property, value, receiver) => {
-    //     target[property] = value;
-    //     if (target.length > 0) {
-    //       this._start();
-    //     }
-    //     return true;
-    //   }
-    // });
-  },
-
-  /**
-   * Starts to track scrolls and call directives
-   * @private
-   */
-  _start() {
-    // add event listener:
-    switch (this.mode) {
-      case 'scroll':
-        window.addEventListener('scroll', this._run);
-        break;
-      case 'requestAnimationFrame':
-        this._scroll.call(window, this._run);
-        break;
-    }
-    // trigger scroll event to apply directives for current positions:
-    if (document.readyState !== 'complete') {
-      window.addEventListener('load', function () {
-        window.scrollTo(window.scrollX, window.scrollX);
-      });
-    }
-    else {
-      window.scrollTo(window.scrollX, window.scrollX);
-    }
-    // set active:
-    this.active = true;
-  },
-
-  /**
-   * Stops to track scrolls and call directives
-   * @private
-   */
-  _stop() {
-    // remove event listener:
-    if (this.mode === 'scroll') {
-      window.removeEventListener('scroll', this._run);
-    }
-    // set inactive:
-    this.active = false;
-  },
-
-  /**
-   * Starts or stops orchestrator depends on how many directives are active
-   * @private
-   */
-  _update() {
-    // stop if there are no directives or all of them are disabled:
-    if (this._collection.length === 0 || this._collection.every(directive => !directive.enabled)) {
-      this.active && this._stop();
-    }
-    else {
-      !this.active && this._start();
-    }
-  },
-
-  /**
-   *
-   * @private
-   */
-  _run: function () {
-    // position hasn't changed (optimization):
-    if (this._position[0] === window.pageXOffset && this._position[1] === window.pageYOffset) {
-      // re-run:
-      if (this.mode === 'requestAnimationFrame') {
-        this._scroll.call(window, this._run);
-      }
-      return false;
-    }
-
-    this._position = [window.pageXOffset, window.pageYOffset];
-    this._collection.forEach(p => p.run(this._position[0], this._position[1]));
-
-    // re-run:
-    if (this.mode === 'requestAnimationFrame') {
-      this._scroll.call(window, this._run);
-    }
-  },
-
-  /**
-   * Adds a new directive to collection
-   * @param {string} [id] Directive unique ID
-   * @param {object} options Directive options
-   * @return {string} Directive ID if valid, undefined otherwise
-   */
-  add(id, options) {
-    // validate arguments:
-    if (!(typeof id === 'object' || typeof options === 'object')) {
-      console.warn('Orchestrator: wrong number or type of arguments');
-      return false;
-    }
-    // generate directive id if it's empty and move current id content to options:
-    else if (!options) {
-      options = id;
-      id = null;
-    }
-    else {
-      this.remove(id);
-    }
-
-    // create directive
-    let directive = new Directive(id, options);
-    // add it to collection, upte status and return its id:
-    if (directive.valid) {
-      this._collection.push(directive);
-      this._update();
-      return directive.id;
-    }
-  },
-
-  /**
-   * Removes an existing directive or many directives from collection
-   * @param {string} ids One or more directive unique ID to delete.
-   * Leave blank to delete all directives.
-   */
-  remove(...ids) {
-    // delete all & update status:
-    if (ids.length === 0) {
-      this._collection.length = 0;
-      this._update();
-      return true;
-    }
-
-    // delete some by id & update status:
-    ids.forEach(id => {
-      let index = this._collection.findIndex(p => p.id === id);
-      if (index >= 0) {
-        this._collection.splice(index, 1);
-        this._update();
-      }
-    });
-  },
-
-  /**
-   * Disables a directive or many directives
-   * @param {string} [ids] One or more directive unique ID to disable.
-   * Leave blank to disable all directives.
-   */
-  disable(...ids) {
-    this._collection
-      .filter(p => ids.includes(p.id) || ids.length === 0)
-      .forEach(p => {
-        p.disable();
-        this._update();
-      });
-  },
-
-  /**
-   * Enables a directive or many directives
-   * @param {string} [ids] One or more directive unique ID to enable.
-   * Leave blank to enable all directives.
-   */
-  enable(...ids) {
-    this._collection
-      .filter(p => ids.includes(p.id) || ids.length === 0)
-      .forEach(p => {
-        p.enable();
-        this._update();
-      });
+/**
+ * Created by nirelbaz on 21/12/2016.
+ */
+class Orchestrator {
+  constructor(options) {
+    /**
+     * Orchestrator unique ID
+     * @type {string}
+     */
+    this.id = btoa(new Date().valueOf().toString());
+    /**
+     * Indicates whether orchestrator is enabled
+     * @type {boolean}
+     */
+    this.enabled = false;
+    /**
+     * Indicates whether orchestrator passed validation successfully
+     * @type {boolean}
+     */
+    this.valid = false;
+    /**
+     * DOM element(s)
+     * @type {HTMLElement[]}
+     */
+    this.element = null;
+    // extract additional properties from options:
+    this.extractOptions(options)
   }
-};
 
-orchestrator._init();
+  /**
+   * Disables orchestrator
+   */
+  disable() {
+    this.enabled = false;
+  }
 
-// export default orchestrator:
-export default orchestrator;
+  /**
+   * Enables orchestrator
+   */
+  enable() {
+    this.enabled = true;
+  }
+
+  /**
+   * Extracts & validates options
+   * @param {object} options Orchestrator options
+   */
+  extractOptions(options) {
+    // check for common options:
+    if (options.selector &&
+      ((options.top && (Number.isInteger(options.top) || (typeof options.top === 'object' && options.top.from && Number.isInteger(options.top.from)))) ||
+      (options.left && (Number.isInteger(options.left) || (typeof options.left === 'object' && options.left.from && Number.isInteger(options.left.from))))) &&
+      (options.setStyle || options.addClass || options.removeClass || options.callFunction)
+    ) {
+      this.selector = options.selector;
+      this.element = document.querySelectorAll(options.selector);
+      this.style = [];
+      this.actions = {};
+      this.left = {
+        from: options.left && Number.isInteger(options.left) ? options.left : options.left ? options.left.from : null,
+        to: options.left && options.left.to || null
+      };
+      this.top = {
+        from: options.top && Number.isInteger(options.top) ? options.top : options.top ? options.top.from : null,
+        to: options.top && options.top.to || null
+      };
+      if (options.debounce) {
+        this.run = _.debounce(this._run, Number.isInteger(options.debounce) ? options.debounce : 100);
+      }
+      else if (options.throttle) {
+        this.run = _.throttle(this._run, Number.isInteger(options.throttle) ? options.throttle : 100);
+      }
+      else {
+        this.run = this._run;
+      }
+
+      // now check actions object:
+      actions.forEach(action => {
+        if (options.hasOwnProperty(action)) {
+          switch (action) {
+            case 'removeClass':
+            case 'addClass':
+              if (typeof options[action] === 'string' || Array.isArray(options[action])) {
+                if (typeof options[action] === 'string') {
+                  this.actions[action] = [options[action]];
+                }
+              }
+              else {
+                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+              }
+              break;
+            case 'setStyle':
+              if (typeof options[action] === 'object' && Object.keys(options[action]).length > 0) {
+                this.actions[action] = options[action];
+                // store current style:
+                this.getCurrentStyle();
+              }
+              else {
+                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+              }
+              break;
+            case 'callFunction':
+              if (typeof options[action] === 'function') {
+                this.actions[action] = options[action];
+              }
+              else {
+                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+              }
+              break;
+          }
+        }
+      });
+
+      // validate that there is at least one action:
+      if (Object.keys(this.actions).length > 0) {
+        collection.push(this);
+        this.enabled = true;
+        this.valid = true;
+      }
+      else {
+        console.warn(`Orchestrator ${this.id} has no valid actions`);
+      }
+    }
+    else {
+      console.warn(`Orchestrator ${this.id} is not valid`);
+    }
+  }
+
+  /**
+   * Stores element's current style for reset when scroll not in range
+   */
+  getCurrentStyle() {
+    if (this.element && this.element.length > 0) {
+      [...this.element].forEach((element, index) => {
+        let style = window.getComputedStyle(element),
+          current = this.style && this.style.length > index && this.style[index] || {};
+
+        Object.keys(this.actions.setStyle).forEach(prop => {
+          current[prop] = style.getPropertyValue(prop);
+        });
+        this.style.push(current);
+      });
+    }
+  }
+
+  _run() {
+    let position = window.position;
+
+    // continue only if orchestrator is enabled & valid:
+    if (this.enabled && this.valid) {
+      // if element is empty, find and cache it:
+      if (!this.element || this.element.length === 0) {
+        this.element = document.querySelectorAll(this.selector);
+        this.getCurrentStyle();
+      }
+      // verify there's such element:
+      if (this.element && this.element.length > 0) {
+        // orchestrator is in range:
+        if ((this.top.from && position.top >= this.top.from && (position.top <= this.top.to || !this.top.to)) ||
+          (this.left.from && position.left >= this.left.from && (position.left <= this.left.to || !this.left.to))) {
+          this._apply();
+        }
+        // orchestrator is out of range:
+        else {
+          this._cease();
+        }
+      }
+    }
+  }
+
+  /**
+   * Applies all actions when scroll is in range
+   * @private
+   */
+  _apply() {
+    for (let action in this.actions) {
+      if (this.actions.hasOwnProperty(action)) {
+        switch (action) {
+          case 'addClass':
+          case 'removeClass':
+            [...this.element].forEach(element => {
+              this.actions[action].forEach(className => {
+                if (action === 'addClass') {
+                  element.classList.add(className);
+                }
+                else {
+                  element.classList.remove(className);
+                }
+              });
+            });
+            break;
+          case 'setStyle':
+            for (let property in this.actions[action]) {
+              if (this.actions[action].hasOwnProperty(property)) {
+                [...this.element].forEach(element => {
+                  element.style[property] = typeof this.actions[action][property] === 'function' ?
+                    this.actions[action][property](position.left, position.top) :
+                    this.actions[action][property];
+                });
+              }
+            }
+            break;
+          case 'callFunction':
+            this.actions[action](position.left, position.top);
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Ceases some actions (setStyle, addClass & removeClass) when scroll is out of range
+   * @private
+   */
+  _cease() {
+    for (let action in this.actions) {
+      if (this.actions.hasOwnProperty(action)) {
+        switch (action) {
+          case 'addClass':
+          case 'removeClass':
+            [...this.element].forEach(element => {
+              this.actions[action].forEach(className => {
+                if (action === 'addClass') {
+                  element.classList.remove(className);
+                }
+                else {
+                  element.classList.add(className);
+                }
+              });
+            });
+            break;
+          case 'setStyle':
+            for (let property in this.actions[action]) {
+              if (this.actions[action].hasOwnProperty(property)) {
+                [...this.element].forEach((element, index) => {
+                  element.style[property] = this.style[index][property];
+                });
+              }
+            }
+            break;
+        }
+      }
+    }
+  }
+}
+
+export default Orchestrator;
