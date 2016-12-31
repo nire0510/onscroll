@@ -56,11 +56,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	var _collection = __webpack_require__(1);
+	var _pubsub = __webpack_require__(1);
+	
+	var _collection = __webpack_require__(2);
 	
 	var _collection2 = _interopRequireDefault(_collection);
 	
-	var _orchestrator = __webpack_require__(2);
+	var _orchestrator = __webpack_require__(3);
 	
 	var _orchestrator2 = _interopRequireDefault(_orchestrator);
 	
@@ -83,6 +85,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @type {string}
 	 */
 	var mode = 'scroll'; // 'requestAnimationFrame'
+	/**
+	 * Indicates whether library already initialized
+	 * @type {boolean}
+	 */
+	var initialized = false;
 	
 	/**
 	 * Main execution function
@@ -99,7 +106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  window.position = { left: window.pageXOffset, top: window.pageYOffset };
-	  _collection2.default.forEach(function (o) {
+	  _collection2.default.data.forEach(function (o) {
 	    o.run();
 	  });
 	
@@ -109,7 +116,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 	
-	(function init() {
+	function init() {
 	  // add event listener:
 	  switch (mode) {
 	    case 'scroll':
@@ -128,7 +135,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    window.scrollTo(window.scrollX, window.scrollX);
 	  }
-	})();
+	
+	  console.log('Orchestrator initialized');
+	  initialized = true;
+	}
+	
+	_pubsub.pubsub.subscribe('collection:item-added', function () {
+	  if (!initialized) {
+	    init();
+	  }
+	});
 	
 	// export default orchestrator:
 	module.exports = _orchestrator2.default;
@@ -137,20 +153,78 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	/**
+	 * Created by nirelbaz on 31/12/2016.
+	 */
+	var PubSub = function () {
+	  function PubSub() {
+	    _classCallCheck(this, PubSub);
+	
+	    this.handlers = [];
+	  }
+	
+	  _createClass(PubSub, [{
+	    key: 'subscribe',
+	    value: function subscribe(event, handler, context) {
+	      if (typeof context === 'undefined') {
+	        context = handler;
+	      }
+	
+	      this.handlers.push({ event: event, handler: handler.bind(context) });
+	    }
+	  }, {
+	    key: 'publish',
+	    value: function publish(event) {
+	      for (var i = 0; i < this.handlers.length; i++) {
+	        if (this.handlers[i].event === event) {
+	          this.handlers[i].handler.call();
+	        }
+	      }
+	    }
+	  }]);
+	
+	  return PubSub;
+	}();
+	
+	var pubsub = exports.pubsub = new PubSub();
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _pubsub = __webpack_require__(1);
+	
 	/**
 	 * Created by nirelbaz on 30/12/2016.
 	 */
-	var collection = [];
+	var collection = {
+	  data: [],
+	  add: function add(item) {
+	    this.data.push(item);
+	    _pubsub.pubsub.publish('collection:item-added');
+	  }
+	};
 	
 	exports.default = collection;
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -163,11 +237,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _lodash = __webpack_require__(3);
+	var _lodash = __webpack_require__(4);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _collection = __webpack_require__(1);
+	var _collection = __webpack_require__(2);
 	
 	var _collection2 = _interopRequireDefault(_collection);
 	
@@ -300,7 +374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        // validate that there is at least one action:
 	        if (Object.keys(this.actions).length > 0) {
-	          _collection2.default.push(this);
+	          _collection2.default.add(this);
 	          this.enabled = true;
 	          this.valid = true;
 	        } else {
@@ -462,7 +536,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Orchestrator;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {'use strict';
@@ -1143,7 +1217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /*--------------------------------------------------------------------------*/
 	
 	  // Some AMD build optimizers, like r.js, check for condition patterns like:
-	  if ("function" == 'function' && _typeof(__webpack_require__(5)) == 'object' && __webpack_require__(5)) {
+	  if ("function" == 'function' && _typeof(__webpack_require__(6)) == 'object' && __webpack_require__(6)) {
 	    // Expose Lodash on the global object to prevent errors when Lodash is
 	    // loaded by a script tag in the presence of an AMD loader.
 	    // See http://requirejs.org/docs/errors.html#mismatch for more details.
@@ -1167,10 +1241,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      root._ = lodash;
 	    }
 	}).call(undefined);
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(4)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(5)(module)))
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -1186,7 +1260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;

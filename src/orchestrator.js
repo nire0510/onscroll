@@ -118,7 +118,7 @@ class Orchestrator {
 
       // validate that there is at least one action:
       if (Object.keys(this.actions).length > 0) {
-        collection.push(this);
+        collection.add(this);
         this.enabled = true;
         this.valid = true;
       }
