@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<h1>Title</h1>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus dicta eius eveniet, ex explicabo facere in, incidunt inventore iusto maxime numquam officia pariatur perferendis quaerat quas quasi, quia quod reiciendis.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad alias aut consequatur culpa deserunt, impedit incidunt, iure necessitatibus nesciunt nobis perferendis, porro quam quo sed velit. Aliquam dolore doloremque quidem!</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi consectetur consequatur corporis cupiditate delectus eos error eum itaque velit veritatis? Adipisci beatae consequatur dicta doloribus iusto nesciunt saepe temporibus voluptas!</p>
+<h1>Title</h1>
+<h2>Subtitle</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aperiam ea, eligendi enim et ex harum ipsum magnam minima molestiae mollitia necessitatibus nesciunt officia perferendis quia quisquam ut? Suscipit, voluptatibus.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam asperiores, corporis eos eveniet ex facere in inventore ipsam magni molestias qui quo unde. A asperiores est magni optio sed voluptas?</p>
+<script src="../dist/orchestrator.js"></script>
+<script>
+  let p = new Orchestrator.default({
+    selector: 'h1',
+    top: 10,
+    //top: {
+    //  from: 10,
+    //  to: 100
+    //},
+    left: 20,
+    //left: {
+    //  from: 10,
+    //  to: 100
+    //},
+    debounce: true,
+    //debounce: 100,
+    //throttle: true,
+    //throttle: 100,
+    setStyle: {
+      padding: function (left, top) {
+
+      }
+    },
+    addClass: 'foo',
+    //addClass: ['foo', 'bar'],
+    removeClass: 'foo',
+    //removeClass: ['foo', 'bar'],
+    callFunction: function (left, top) {
+      console.log('Do something...');
+
+    }
+  });
+</script>
+</body>
+</html>
