@@ -53,8 +53,8 @@ class Orchestrator {
   extractOptions(options) {
     // check for common options:
     if (options.selector &&
-      ((options.hasOwnProperty('top') && (Number.isInteger(options.top) || (typeof options.top === 'object' && options.top.from && Number.isInteger(options.top.from)))) ||
-      (options.hasOwnProperty('left') && (Number.isInteger(options.left) || (typeof options.left === 'object' && options.left.from && Number.isInteger(options.left.from))))) &&
+      ((options.hasOwnProperty('top') && (Number.isInteger(options.top) || (typeof options.top === 'object' && options.top.hasOwnProperty('from') && Number.isInteger(options.top.from)))) ||
+      (options.hasOwnProperty('left') && (Number.isInteger(options.left) || (typeof options.left === 'object' && options.left.hasOwnProperty('from') && Number.isInteger(options.left.from))))) &&
       (options.setStyle || options.addClass || options.removeClass || options.callFunction)
     ) {
       this.selector = options.selector;
