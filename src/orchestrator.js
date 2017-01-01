@@ -63,16 +63,16 @@ class Orchestrator {
       this.actions = {};
       this.left = {
         from: options.hasOwnProperty('left') && Number.isInteger(options.left) ? options.left : options.hasOwnProperty('left') ? options.left.from : null,
-        to: options.hasOwnProperty('left') && options.left.to || null
+        to: options.hasOwnProperty('left') && options.left.hasOwnProperty('to') && Number.isInteger(options.left.to) ? options.left.to : null
       };
       this.top = {
         from: options.hasOwnProperty('top') && Number.isInteger(options.top) ? options.top : options.hasOwnProperty('top') ? options.top.from : null,
-        to: options.hasOwnProperty('top') && options.top.to || null
+        to: options.hasOwnProperty('top') && options.top.hasOwnProperty('to') && Number.isInteger(options.top.to) ? options.top.to : null
       };
-      if (options.debounce) {
+      if (options.hasOwnProperty('debounce')) {
         this.run = _.debounce(this._run, Number.isInteger(options.debounce) ? options.debounce : 100);
       }
-      else if (options.throttle) {
+      else if (options.hasOwnProperty('throttle')) {
         this.run = _.throttle(this._run, Number.isInteger(options.throttle) ? options.throttle : 100);
       }
       else {
