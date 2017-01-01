@@ -167,7 +167,10 @@ class Orchestrator {
       // if element is empty, find and cache it:
       if (!this.element || this.element.length === 0) {
         this.element = document.querySelectorAll(this.selector);
-        this.getCurrentStyle();
+        if (this.actions.hasOwnProperty('setStyle')) {
+          // store current style:
+          this.getCurrentStyle();
+        }
       }
       // verify there's such element:
       if (this.element && this.element.length > 0) {
