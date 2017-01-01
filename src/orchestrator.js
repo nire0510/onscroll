@@ -161,8 +161,8 @@ class Orchestrator {
       // verify there's such element:
       if (this.element && this.element.length > 0) {
         // orchestrator is in range:
-        if ((this.top.from && position.top >= this.top.from && (position.top <= this.top.to || !this.top.to)) ||
-          (this.left.from && position.left >= this.left.from && (position.left <= this.left.to || !this.left.to))) {
+        if ((Number.isInteger(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null)) ||
+          (Number.isInteger(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null))) {
           this._apply();
         }
         // orchestrator is out of range:
