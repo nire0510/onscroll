@@ -33,9 +33,13 @@ class Orchestrator {
   }
 
   /**
-   * Disables orchestrator
+   * Temporarily disables orchestrator
+   * @param {boolean} cease Indicates whether to cease all changes (works only for addClass, removeClass & setStyle)
    */
-  disable() {
+  disable(cease) {
+    if (cease) {
+      this._cease();
+    }
     this.enabled = false;
   }
 
@@ -44,6 +48,13 @@ class Orchestrator {
    */
   enable() {
     this.enabled = true;
+  }
+
+  /**
+   * Permanently disables orchestrator
+   */
+  remove() {
+    collection.remove(this.id);
   }
 
   /**

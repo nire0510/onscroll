@@ -5,9 +5,23 @@ import { pubsub } from './pubsub';
  */
 let collection = {
   data: [],
+
   add(item) {
     this.data.push(item);
-    pubsub.publish('collection:item-added');
+    pubsub.publish('collection:changed');
+  },
+
+  size() {
+    return this.data.length;
+  },
+
+  remove(id) {
+    let index = this.data.findIndex(o => o.id === id);
+
+    if (index >= 0) {
+      this.data.splice(index, 1);
+      pubsub.publish('collection:changed');
+    }
   }
 };
 

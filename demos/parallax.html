@@ -76,18 +76,20 @@
 </section>
 <script src="../dist/orchestrator.js"></script>
 <script>
+  let a, b, c;
+
   window.addEventListener('load', function () {
     let offsetTop = getCoords(document.querySelector('.slide-3')).top,
       slide3Height = document.querySelector('.slide-3').offsetHeight,
       windowHeight = window.innerHeight;
 
-    new Orchestrator({
+    a = new Orchestrator({
       selector: '.slide-3',
       top: offsetTop,
       addClass: 'fixed'
     });
 
-    new Orchestrator({
+    b = new Orchestrator({
       selector: '.slide-3',
       top: offsetTop + slide3Height,
       setStyle: {
@@ -97,7 +99,7 @@
       }
     });
 
-    new Orchestrator({
+    c = new Orchestrator({
       selector: '.slide-1',
       top: {
         from: 40,
