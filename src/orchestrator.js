@@ -53,8 +53,8 @@ class Orchestrator {
   extractOptions(options) {
     // check for common options:
     if (options.selector &&
-      ((options.top && (Number.isInteger(options.top) || (typeof options.top === 'object' && options.top.from && Number.isInteger(options.top.from)))) ||
-      (options.left && (Number.isInteger(options.left) || (typeof options.left === 'object' && options.left.from && Number.isInteger(options.left.from))))) &&
+      ((options.hasOwnProperty('top') && (Number.isInteger(options.top) || (typeof options.top === 'object' && options.top.from && Number.isInteger(options.top.from)))) ||
+      (options.hasOwnProperty('left') && (Number.isInteger(options.left) || (typeof options.left === 'object' && options.left.from && Number.isInteger(options.left.from))))) &&
       (options.setStyle || options.addClass || options.removeClass || options.callFunction)
     ) {
       this.selector = options.selector;
@@ -62,12 +62,12 @@ class Orchestrator {
       this.style = [];
       this.actions = {};
       this.left = {
-        from: options.left && Number.isInteger(options.left) ? options.left : options.left ? options.left.from : null,
-        to: options.left && options.left.to || null
+        from: options.hasOwnProperty('left') && Number.isInteger(options.left) ? options.left : options.hasOwnProperty('left') ? options.left.from : null,
+        to: options.hasOwnProperty('left') && options.left.to || null
       };
       this.top = {
-        from: options.top && Number.isInteger(options.top) ? options.top : options.top ? options.top.from : null,
-        to: options.top && options.top.to || null
+        from: options.hasOwnProperty('top') && Number.isInteger(options.top) ? options.top : options.hasOwnProperty('top') ? options.top.from : null,
+        to: options.hasOwnProperty('top') && options.top.to || null
       };
       if (options.debounce) {
         this.run = _.debounce(this._run, Number.isInteger(options.debounce) ? options.debounce : 100);
