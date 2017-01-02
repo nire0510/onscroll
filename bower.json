@@ -1,7 +1,7 @@
 {
-  "name": "orchestrator",
+  "name": "onscroll",
   "description": "Makes your web page dance on scroll",
-  "main": "dist/orchestrator.js",
+  "main": "dist/onscroll.js",
   "authors": [
     "Nir Elbaz <nire0510@gmail.com>"
   ],
@@ -12,7 +12,7 @@
     "transition",
     "performance"
   ],
-  "homepage": "https://github.com/nire0510/orchestrator",
+  "homepage": "https://github.com/nire0510/onscroll",
   "ignore": [
     "**/.*",
     "node_modules",

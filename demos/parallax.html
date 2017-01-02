@@ -74,7 +74,7 @@
 <section class="slide-5">
   Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequuntur, cupiditate doloremque error eum excepturi iusto, magni maxime molestiae molestias necessitatibus non obcaecati quaerat quia quisquam sint veritatis voluptatum. Perferendis, quo.
 </section>
-<script src="../dist/orchestrator.js"></script>
+<script src="../dist/onscroll.js"></script>
 <script>
   let a, b, c;
 
@@ -83,13 +83,13 @@
       slide3Height = document.querySelector('.slide-3').offsetHeight,
       windowHeight = window.innerHeight;
 
-    a = new Orchestrator({
+    a = new Onscroll({
       selector: '.slide-3',
       top: offsetTop,
       addClass: 'fixed'
     });
 
-    b = new Orchestrator({
+    b = new Onscroll({
       selector: '.slide-3',
       top: offsetTop + slide3Height,
       setStyle: {
@@ -99,7 +99,7 @@
       }
     });
 
-    c = new Orchestrator({
+    c = new Onscroll({
       selector: '.slide-1',
       top: {
         from: 40,

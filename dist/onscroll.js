@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["Orchestrator"] = factory();
+		exports["Onscroll"] = factory();
 	else
-		root["Orchestrator"] = factory();
+		root["Onscroll"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -62,9 +62,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _collection2 = _interopRequireDefault(_collection);
 	
-	var _orchestrator = __webpack_require__(3);
+	var _onscroll = __webpack_require__(3);
 	
-	var _orchestrator2 = _interopRequireDefault(_orchestrator);
+	var _onscroll2 = _interopRequireDefault(_onscroll);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -86,7 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var mode = 'scroll'; // 'requestAnimationFrame'
 	/**
-	 * Indicates whether library is up and running (has at least 1 orchestrator)
+	 * Indicates whether library is up and running (has at least 1 instance)
 	 * @type {boolean}
 	 */
 	var active = false;
@@ -119,7 +119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	_pubsub.pubsub.subscribe('collection:changed', function () {
-	  // there is at least 1 orchestrator:
+	  // there is at least 1 instance:
 	  if (_collection2.default.size() > 0) {
 	    if (!active) {
 	      // add event listener:
@@ -141,11 +141,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        window.scrollTo(window.scrollX, window.scrollX);
 	      }
 	
-	      console.log('Orchestrator initialized');
+	      console.log('Onscroll initialized');
 	      active = true;
 	    }
 	  }
-	  // no orchestrators in collection:
+	  // no instances in collection:
 	  else {
 	      if (active) {
 	        window.removeEventListener('scroll', run);
@@ -154,8 +154,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 	
-	// export default orchestrator:
-	module.exports = _orchestrator2.default;
+	// export default Onscroll:
+	module.exports = _onscroll2.default;
 
 /***/ },
 /* 1 */
@@ -279,22 +279,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Created by nirelbaz on 21/12/2016.
 	 */
 	
-	var Orchestrator = function () {
-	  function Orchestrator(options) {
-	    _classCallCheck(this, Orchestrator);
+	var Onscroll = function () {
+	  function Onscroll(options) {
+	    _classCallCheck(this, Onscroll);
 	
 	    /**
-	     * Orchestrator unique ID
+	     * Instance unique ID
 	     * @type {string}
 	     */
 	    this.id = btoa(new Date().valueOf().toString());
 	    /**
-	     * Indicates whether orchestrator is enabled
+	     * Indicates whether instance is enabled
 	     * @type {boolean}
 	     */
 	    this.enabled = false;
 	    /**
-	     * Indicates whether orchestrator passed validation successfully
+	     * Indicates whether instance passed validation successfully
 	     * @type {boolean}
 	     */
 	    this.valid = false;
@@ -308,12 +308,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  /**
-	   * Temporarily disables orchestrator
+	   * Temporarily disables instance
 	   * @param {boolean} cease Indicates whether to cease all changes (works only for addClass, removeClass & setStyle)
 	   */
 	
 	
-	  _createClass(Orchestrator, [{
+	  _createClass(Onscroll, [{
 	    key: 'disable',
 	    value: function disable(cease) {
 	      if (cease) {
@@ -323,7 +323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Enables orchestrator
+	     * Enables instance
 	     */
 	
 	  }, {
@@ -333,7 +333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Permanently disables orchestrator
+	     * Permanently disables instance
 	     */
 	
 	  }, {
@@ -344,7 +344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Extracts & validates options
-	     * @param {object} options Orchestrator options
+	     * @param {object} options Instance options
 	     */
 	
 	  }, {
@@ -385,7 +385,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this.actions[action] = [options[action]];
 	                  }
 	                } else {
-	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
+	                  console.warn('Action ' + action + ' of instance ' + _this.id + ' is not valid');
 	                }
 	                break;
 	              case 'setStyle':
@@ -394,14 +394,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  // store current style:
 	                  _this.getCurrentStyle();
 	                } else {
-	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
+	                  console.warn('Action ' + action + ' of instance ' + _this.id + ' is not valid');
 	                }
 	                break;
 	              case 'callFunction':
 	                if (typeof options[action] === 'function') {
 	                  _this.actions[action] = options[action];
 	                } else {
-	                  console.warn('Action ' + action + ' of orchestrator ' + _this.id + ' is not valid');
+	                  console.warn('Action ' + action + ' of instance ' + _this.id + ' is not valid');
 	                }
 	                break;
 	            }
@@ -414,10 +414,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          this.enabled = true;
 	          this.valid = true;
 	        } else {
-	          console.warn('Orchestrator ' + this.id + ' has no valid actions');
+	          console.warn('Onscroll ' + this.id + ' has no valid actions');
 	        }
 	      } else {
-	        console.warn('Orchestrator ' + this.id + ' is not valid');
+	        console.warn('Onscroll ' + this.id + ' is not valid');
 	      }
 	    }
 	
@@ -447,7 +447,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function _run() {
 	      var position = window.position;
 	
-	      // continue only if orchestrator is enabled & valid:
+	      // continue only if instance is enabled & valid:
 	      if (this.enabled && this.valid) {
 	        // if element is empty, find and cache it:
 	        if (!this.element || this.element.length === 0) {
@@ -459,11 +459,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        // verify there's such element:
 	        if (this.element && this.element.length > 0) {
-	          // orchestrator is in range:
+	          // instance is in range:
 	          if (Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null) || Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null)) {
 	            this._apply();
 	          }
-	          // orchestrator is out of range:
+	          // instance is out of range:
 	          else {
 	              this._cease();
 	            }
@@ -569,10 +569,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }]);
 	
-	  return Orchestrator;
+	  return Onscroll;
 	}();
 	
-	exports.default = Orchestrator;
+	exports.default = Onscroll;
 
 /***/ },
 /* 4 */
@@ -1310,4 +1310,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=orchestrator.js.map
+//# sourceMappingURL=onscroll.js.map

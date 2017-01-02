@@ -1,6 +1,6 @@
 import { pubsub } from './pubsub';
 import collection from './collection';
-import Orchestrator from './orchestrator';
+import Onscroll from './onscroll';
 
 /**
  * Scroll callback function
@@ -23,7 +23,7 @@ window.position = { left: -1, top: -1 };
  */
 let mode = 'scroll'; // 'requestAnimationFrame'
 /**
- * Indicates whether library is up and running (has at least 1 orchestrator)
+ * Indicates whether library is up and running (has at least 1 instance)
  * @type {boolean}
  */
 let active = false;
@@ -56,7 +56,7 @@ function run() {
 }
 
 pubsub.subscribe('collection:changed', function () {
-  // there is at least 1 orchestrator:
+  // there is at least 1 instance:
   if (collection.size() > 0) {
     if (!active) {
       // add event listener:
@@ -79,11 +79,11 @@ pubsub.subscribe('collection:changed', function () {
         window.scrollTo(window.scrollX, window.scrollX);
       }
 
-      console.log('Orchestrator initialized');
+      console.log('Onscroll initialized');
       active = true;
     }
   }
-  // no orchestrators in collection:
+  // no instances in collection:
   else {
     if (active) {
       window.removeEventListener('scroll', run);
@@ -92,5 +92,5 @@ pubsub.subscribe('collection:changed', function () {
   }
 });
 
-// export default orchestrator:
-module.exports = Orchestrator;
+// export default Onscroll:
+module.exports = Onscroll;

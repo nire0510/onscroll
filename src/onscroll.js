@@ -6,20 +6,20 @@ const actions = ['setStyle', 'removeClass', 'addClass', 'callFunction'];
 /**
  * Created by nirelbaz on 21/12/2016.
  */
-class Orchestrator {
+class Onscroll {
   constructor(options) {
     /**
-     * Orchestrator unique ID
+     * Instance unique ID
      * @type {string}
      */
     this.id = btoa(new Date().valueOf().toString());
     /**
-     * Indicates whether orchestrator is enabled
+     * Indicates whether instance is enabled
      * @type {boolean}
      */
     this.enabled = false;
     /**
-     * Indicates whether orchestrator passed validation successfully
+     * Indicates whether instance passed validation successfully
      * @type {boolean}
      */
     this.valid = false;
@@ -33,7 +33,7 @@ class Orchestrator {
   }
 
   /**
-   * Temporarily disables orchestrator
+   * Temporarily disables instance
    * @param {boolean} cease Indicates whether to cease all changes (works only for addClass, removeClass & setStyle)
    */
   disable(cease) {
@@ -44,14 +44,14 @@ class Orchestrator {
   }
 
   /**
-   * Enables orchestrator
+   * Enables instance
    */
   enable() {
     this.enabled = true;
   }
 
   /**
-   * Permanently disables orchestrator
+   * Permanently disables instance
    */
   remove() {
     collection.remove(this.id);
@@ -59,7 +59,7 @@ class Orchestrator {
 
   /**
    * Extracts & validates options
-   * @param {object} options Orchestrator options
+   * @param {object} options Instance options
    */
   extractOptions(options) {
     // check for common options:
@@ -102,7 +102,7 @@ class Orchestrator {
                 }
               }
               else {
-                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+                console.warn(`Action ${action} of instance ${this.id} is not valid`);
               }
               break;
             case 'setStyle':
@@ -112,7 +112,7 @@ class Orchestrator {
                 this.getCurrentStyle();
               }
               else {
-                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+                console.warn(`Action ${action} of instance ${this.id} is not valid`);
               }
               break;
             case 'callFunction':
@@ -120,7 +120,7 @@ class Orchestrator {
                 this.actions[action] = options[action];
               }
               else {
-                console.warn(`Action ${action} of orchestrator ${this.id} is not valid`);
+                console.warn(`Action ${action} of instance ${this.id} is not valid`);
               }
               break;
           }
@@ -134,11 +134,11 @@ class Orchestrator {
         this.valid = true;
       }
       else {
-        console.warn(`Orchestrator ${this.id} has no valid actions`);
+        console.warn(`Onscroll ${this.id} has no valid actions`);
       }
     }
     else {
-      console.warn(`Orchestrator ${this.id} is not valid`);
+      console.warn(`Onscroll ${this.id} is not valid`);
     }
   }
 
@@ -162,7 +162,7 @@ class Orchestrator {
   _run() {
     let position = window.position;
 
-    // continue only if orchestrator is enabled & valid:
+    // continue only if instance is enabled & valid:
     if (this.enabled && this.valid) {
       // if element is empty, find and cache it:
       if (!this.element || this.element.length === 0) {
@@ -174,12 +174,12 @@ class Orchestrator {
       }
       // verify there's such element:
       if (this.element && this.element.length > 0) {
-        // orchestrator is in range:
+        // instance is in range:
         if ((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null)) ||
           (Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null))) {
           this._apply();
         }
-        // orchestrator is out of range:
+        // instance is out of range:
         else {
           this._cease();
         }
@@ -263,4 +263,4 @@ class Orchestrator {
   }
 }
 
-export default Orchestrator;
+export default Onscroll;
