@@ -1,5 +1,6 @@
 {
   "name": "onscroll",
+  "version": "0.0.1",
   "description": "Makes your web page dance on scroll",
   "main": "dist/onscroll.js",
   "authors": [
