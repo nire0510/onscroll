@@ -100,6 +100,9 @@ class Onscroll {
                 if (typeof options[action] === 'string') {
                   this.actions[action] = [options[action]];
                 }
+                else {
+                  this.actions[action] = options[action];
+                }
               }
               else {
                 console.warn(`Action ${action} of instance ${this.id} is not valid`);

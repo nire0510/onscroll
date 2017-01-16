@@ -17,6 +17,14 @@
       text-align: center;
     }
 
+    .bold {
+      font-weight: bold;
+    }
+
+    .italic {
+      font-style: italic;
+    }
+
     .slide-1 {
       background-color: #64b5f6;
       transition: color 500ms ease-in-out;
@@ -107,7 +115,8 @@
       },
       setStyle: {
         color: 'red'
-      }
+      },
+      addClass: ['bold', 'italic']
     });
   });
 

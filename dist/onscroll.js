@@ -383,6 +383,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (typeof options[action] === 'string' || Array.isArray(options[action])) {
 	                  if (typeof options[action] === 'string') {
 	                    _this.actions[action] = [options[action]];
+	                  } else {
+	                    _this.actions[action] = options[action];
 	                  }
 	                } else {
 	                  console.warn('Action ' + action + ' of instance ' + _this.id + ' is not valid');
