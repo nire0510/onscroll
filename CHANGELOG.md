@@ -1,4 +1,4 @@
-### [0.1.0](https://github.com/nire0510/onscroll/releases/tag/v0.1.0)
+### [0.1.1](https://github.com/nire0510/onscroll/releases/tag/v0.1.0)
 
 - setStyle & callFunction arguments are now position (position.top, position.left) which holds last scroll position
 and direction (direction.north, direction.west, direction.east, direction.south) which holds last scroll direction
