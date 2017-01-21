@@ -80,6 +80,8 @@ class Onscroll {
         from: options.hasOwnProperty('top') && Number.isFinite(options.top) ? options.top : options.hasOwnProperty('top') ? options.top.from : null,
         to: options.hasOwnProperty('top') && options.top.hasOwnProperty('to') && Number.isFinite(options.top.to) ? options.top.to : null
       };
+      this.direction = typeof options.direction === 'string' ? [options.direction] :
+        Array.isArray(options.direction) ? options.direction : [];
       if (options.hasOwnProperty('debounce')) {
         this.run = _.debounce(this._run, Number.isFinite(options.debounce) ? options.debounce : 100);
       }
@@ -163,7 +165,8 @@ class Onscroll {
   }
 
   _run() {
-    let position = window.position;
+    let position = window._onscroll.position;
+    let direction = window._onscroll.direction;
 
     // continue only if instance is enabled & valid:
     if (this.enabled && this.valid) {
@@ -178,8 +181,9 @@ class Onscroll {
       // verify there's such element:
       if (this.element && this.element.length > 0) {
         // instance is in range:
-        if ((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null)) ||
-          (Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null))) {
+        if (((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null)) ||
+          (Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null))) &&
+          this.direction.some(d => d.split('-').every(d1 => direction[d1]))) {
           this._apply();
         }
         // instance is out of range:
@@ -216,14 +220,14 @@ class Onscroll {
               if (this.actions[action].hasOwnProperty(property)) {
                 [...this.element].forEach(element => {
                   element.style[property] = typeof this.actions[action][property] === 'function' ?
-                    this.actions[action][property](position.left, position.top) :
+                    this.actions[action][property](window._onscroll.position, window._onscroll.direction) :
                     this.actions[action][property];
                 });
               }
             }
             break;
           case 'callFunction':
-            this.actions[action](position.left, position.top);
+            this.actions[action](window._onscroll.position, window._onscroll.direction);
             break;
         }
       }

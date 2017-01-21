@@ -27,12 +27,14 @@
     //  from: 10,
     //  to: 100
     //},
+    direction: 'south',
+    // direction: ['south-west', 'east'],
     debounce: true,
     //debounce: 100,
     //throttle: true,
     //throttle: 100,
     setStyle: {
-      padding: function (left, top) {
+      padding: function (position, direction) {
 
       }
     },
@@ -40,7 +42,7 @@
     //addClass: ['foo', 'bar'],
     removeClass: 'foo',
     //removeClass: ['foo', 'bar'],
-    callFunction: function (left, top) {
+    callFunction: function (position, direction) {
       console.log('Do something...');
 
     }

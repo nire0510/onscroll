@@ -16,7 +16,18 @@ const scroll = window.requestAnimationFrame ||
  * Current H & V scrolls position
  * @type {{left: number, top: number}}
  */
-window.position = { left: -1, top: -1 };
+window._onscroll = {
+  direction: {
+    north: false,
+    south: false,
+    west: false,
+    east: false
+  },
+  position: {
+    left:0,
+    top: 0
+  }
+};
 /**
  * Scroll mode
  * @type {string}
@@ -35,7 +46,7 @@ let active = false;
 function run() {
   if (active) {
     // position hasn't changed (optimization):
-    if (window.position.left === window.pageXOffset && window.position.top === window.pageYOffset) {
+    if (window._onscroll.position.left === window.pageXOffset && window._onscroll.position.top === window.pageYOffset) {
       // re-run:
       if (mode === 'requestAnimationFrame') {
         scroll(run);
@@ -43,7 +54,18 @@ function run() {
       return false;
     }
 
-    window.position = { left: window.pageXOffset, top: window.pageYOffset };
+    window._onscroll = {
+      direction: {
+        north: window.pageYOffset < window._onscroll.position.top,
+        south: window.pageYOffset > window._onscroll.position.top,
+        west: window.pageXOffset < window._onscroll.position.left,
+        east: window.pageXOffset > window._onscroll.position.left
+      },
+      position: {
+        left: window.pageXOffset,
+        top: window.pageYOffset
+      }
+    };
     collection.data.forEach(o => {
       o.run();
     });

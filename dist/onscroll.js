@@ -79,7 +79,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Current H & V scrolls position
 	 * @type {{left: number, top: number}}
 	 */
-	window.position = { left: -1, top: -1 };
+	window._onscroll = {
+	  direction: {
+	    north: false,
+	    south: false,
+	    west: false,
+	    east: false
+	  },
+	  position: {
+	    left: 0,
+	    top: 0
+	  }
+	};
 	/**
 	 * Scroll mode
 	 * @type {string}
@@ -98,7 +109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function run() {
 	  if (active) {
 	    // position hasn't changed (optimization):
-	    if (window.position.left === window.pageXOffset && window.position.top === window.pageYOffset) {
+	    if (window._onscroll.position.left === window.pageXOffset && window._onscroll.position.top === window.pageYOffset) {
 	      // re-run:
 	      if (mode === 'requestAnimationFrame') {
 	        scroll(run);
@@ -106,7 +117,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 	    }
 	
-	    window.position = { left: window.pageXOffset, top: window.pageYOffset };
+	    window._onscroll = {
+	      direction: {
+	        north: window.pageYOffset < window._onscroll.position.top,
+	        south: window.pageYOffset > window._onscroll.position.top,
+	        west: window.pageXOffset < window._onscroll.position.left,
+	        east: window.pageXOffset > window._onscroll.position.left
+	      },
+	      position: {
+	        left: window.pageXOffset,
+	        top: window.pageYOffset
+	      }
+	    };
 	    _collection2.default.data.forEach(function (o) {
 	      o.run();
 	    });
@@ -366,6 +388,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          from: options.hasOwnProperty('top') && Number.isFinite(options.top) ? options.top : options.hasOwnProperty('top') ? options.top.from : null,
 	          to: options.hasOwnProperty('top') && options.top.hasOwnProperty('to') && Number.isFinite(options.top.to) ? options.top.to : null
 	        };
+	        this.direction = typeof options.direction === 'string' ? [options.direction] : Array.isArray(options.direction) ? options.direction : [];
 	        if (options.hasOwnProperty('debounce')) {
 	          this.run = _lodash2.default.debounce(this._run, Number.isFinite(options.debounce) ? options.debounce : 100);
 	        } else if (options.hasOwnProperty('throttle')) {
@@ -447,7 +470,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: '_run',
 	    value: function _run() {
-	      var position = window.position;
+	      var position = window._onscroll.position;
+	      var direction = window._onscroll.direction;
 	
 	      // continue only if instance is enabled & valid:
 	      if (this.enabled && this.valid) {
@@ -462,7 +486,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // verify there's such element:
 	        if (this.element && this.element.length > 0) {
 	          // instance is in range:
-	          if (Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null) || Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null)) {
+	          if ((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null) || Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null)) && this.direction.some(function (d) {
+	            return d.split('-').every(function (d1) {
+	              return direction[d1];
+	            });
+	          })) {
 	            this._apply();
 	          }
 	          // instance is out of range:
@@ -502,7 +530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              var _loop2 = function _loop2(property) {
 	                if (_this3.actions[action].hasOwnProperty(property)) {
 	                  [].concat(_toConsumableArray(_this3.element)).forEach(function (element) {
-	                    element.style[property] = typeof _this3.actions[action][property] === 'function' ? _this3.actions[action][property](position.left, position.top) : _this3.actions[action][property];
+	                    element.style[property] = typeof _this3.actions[action][property] === 'function' ? _this3.actions[action][property](window._onscroll.position, window._onscroll.direction) : _this3.actions[action][property];
 	                  });
 	                }
 	              };
@@ -512,7 +540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	              break;
 	            case 'callFunction':
-	              _this3.actions[action](position.left, position.top);
+	              _this3.actions[action](window._onscroll.position, window._onscroll.direction);
 	              break;
 	          }
 	        }

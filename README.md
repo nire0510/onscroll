@@ -43,6 +43,12 @@ let obj = new Onscroll({
   //  from: 20,
   //  to: 100
   //},
+  
+  // {string} limit manipulation to specific scrolling direction (north, south, west, east)
+  // or
+  // [{string}] multiple directions with OR relation between
+  direction: 'south',
+  //direction: ['south-west', 'west'],
 
   // add one or more class names:
   addClass: 'gold',
@@ -54,8 +60,8 @@ let obj = new Onscroll({
     
   // set inline style:
   setStyle: {
-    transform: function(left, top) {
-      return `translateY(${20 - top}px)`;
+    transform: function(position/*, direction*/) {
+      return `translateY(${20 - position.top}px)`;
     },
     paddingLeft: function(left/*, top*/) {
       return `${left}px`;
@@ -63,7 +69,7 @@ let obj = new Onscroll({
   },
     
   // call a function:
-  callFunction: function(/*left, top*/) {
+  callFunction: function(/*position, direction*/) {
     this.revealPopup();
   }
 });
@@ -88,18 +94,18 @@ new Onscroll({
 ### Moderate
 Use `setStyle` when you want to set or unset CSS properties with **dynamic** values, based on the scroll position.
 This is done by setting inline style to elements. Each property in object is a CSS property and its value is a function 
-with two arguments, `left` (current horizontal scroll position) and `top` (current vertical scroll position),
-which can be used for calculating the function's return value - the value of CSS property. 
+with two arguments, `position` (object which contains current horizontal (left) and vertical (top) scroll position)
+and `direction` (object which contains scroll direction), which can be used for calculating the function's return value - the value of CSS property. 
 ```javascript
 new Onscroll({
   selector: '.some-element',
   top: 20,
   setStyle: {
-    transform: function(left, top) {
-      return `translateY(${20 - top}px)`;
+    transform: function(position/*, direction*/) {
+      return `translateY(${20 - position.top}px)`;
     },
-    paddingLeft: function(left/*, top*/) {
-      return `${left}px`;
+    paddingLeft: function(position/*, direction*/) {
+      return `${position.left}px`;
     }
   }
 });
@@ -108,13 +114,14 @@ new Onscroll({
 ### Advance
 Use `callFunction` when you not necessarily want to manipulate style, but rather call an existing function,
 execute JavaScript etc. The action's value is a function with two arguments,
-`left` (current horizontal scroll position) and `top` (current vertical scroll position) which should not return any value.
+`position` (object which contains current horizontal (left) and vertical (top) scroll position) and
+`direction` (object which contains scroll direction). Function should not return any value.
 ```javascript
 new Onscroll({
   selector: '.some-element',
   top: 20,
-  callFunction: function (left, top) {
-    if (left > 100) {
+  callFunction: function (position, direction) {
+    if (left > 100 && direction.north === true) {
       submitForm();          
     }
   }
