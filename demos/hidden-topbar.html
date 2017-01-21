@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hidden Topbar</title>
+  <link href="http://blokkfont-losgordos.netdna-ssl.com/v2/blokkfont.css" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      font-family: 'BLOKK';
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    nav {
+      background-color: #ddd;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(0);
+      transition: transform 300ms ease-out;
+    }
+
+    main {
+      margin: 100px 1rem 0 1rem;
+    }
+  </style>
+</head>
+<body>
+<nav></nav>
+<main>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+</main>
+<script src="../dist/onscroll.js"></script>
+<script>
+  new Onscroll({
+    selector: 'nav',
+    top: 200,
+    direction: 'south',
+    setStyle: {
+      transform: function (position) {
+        return `translateY(-${Math.min(position.top - 200, 80)}px)`;
+      }
+    }
+  });
+</script>
+</body>
+</html>

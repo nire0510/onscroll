@@ -486,11 +486,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // verify there's such element:
 	        if (this.element && this.element.length > 0) {
 	          // instance is in range:
-	          if ((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null) || Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null)) && this.direction.some(function (d) {
+	          if ((Number.isFinite(this.top.from) && position.top >= this.top.from && (position.top <= this.top.to || this.top.to === null) || Number.isFinite(this.top.left) && position.left >= this.left.from && (position.left <= this.left.to || this.left.to === null)) && (this.direction.length === 0 || this.direction.some(function (d) {
 	            return d.split('-').every(function (d1) {
 	              return direction[d1];
 	            });
-	          })) {
+	          }))) {
 	            this._apply();
 	          }
 	          // instance is out of range:

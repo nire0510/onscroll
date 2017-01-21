@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Floating Footer</title>
+  <link href="http://blokkfont-losgordos.netdna-ssl.com/v2/blokkfont.css" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      font-family: 'BLOKK';
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    nav {
+      background-color: #ddd;
+      height: 80px;
+    }
+
+    main {
+      margin: 1rem;
+    }
+
+    footer {
+      background-color: #aaa;
+      height: 60px;
+      position: fixed;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      transform: translateY(60px);
+      transition: transform 300ms ease-out;
+    }
+
+    footer.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+<nav></nav>
+<main>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci est, tempora. Aliquam amet consequatur cum earum eveniet facilis illum, incidunt labore laborum non obcaecati officia omnis quis? Architecto, eligendi, illum.</p>
+</main>
+<footer></footer>
+<script src="../dist/onscroll.js"></script>
+<script>
+  new Onscroll({
+    selector: 'footer',
+    top: document.body.offsetHeight - window.innerHeight - 200,
+    direction: 'south',
+    addClass: 'show'
+  });
+</script>
+</body>
+</html>
